@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Иконографика для Музея Москвы · Дарья Садикова</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Manrope:wght@800&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- Шрифты (как на главной и в KYBBY) ---------- */
+    @font-face { font-family: "Manrope"; src: local("Manrope ExtraBold"), local("Manrope-ExtraBold"), url("fonts/Manrope-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; font-display: swap; }
+    @font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono Regular"), local("JetBrainsMono-Regular"), url("fonts/JetBrainsMono-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono Medium"), local("JetBrainsMono-Medium"), url("fonts/JetBrainsMono-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+    @font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono Bold"), local("JetBrainsMono-Bold"), url("fonts/JetBrainsMono-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono ExtraBold"), local("JetBrainsMono-ExtraBold"), url("fonts/JetBrainsMono-ExtraBold.woff2") format("woff2"); font-weight: 800; font-style: normal; font-display: swap; }
+
+    /* ---------- Токены (общие для всего портфолио) ---------- */
+    :root {
+      --bg: #efefef;
+      --ink: #333333;
+      --muted: rgba(51, 51, 51, 0.6);
+      --line: rgba(51, 51, 51, 0.4);
+      --accent: #e45f21;
+      --grey-bg: #cdcdcd;
+      --dark-bg: #333333;
+      --dark-line: #545454;
+      --light: #efefef;
+      --light-muted: rgba(239, 239, 239, 0.6);
+      --tint-bg: rgba(228, 95, 33, 0.3);
+
+      --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      --display: "Manrope", "Helvetica Neue", Arial, sans-serif;
+
+      --margin: 120px;
+      --gutter: 40px;
+      --bar-h: 64px;
+    }
+    @media (max-width: 1240px) { :root { --margin: 64px; } }
+    @media (max-width: 560px)  { :root { --margin: 24px; --gutter: 16px; --bar-h: 56px; } }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: calc(var(--bar-h) + 24px); }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--mono); font-size: 18px; line-height: 1.5; }
+    p, h1, h2, h3, h4, ul, ol, dl, dd, figure { margin: 0; padding: 0; }
+    ul, ol { list-style: none; }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; height: auto; }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+    p, li, dd, figcaption { text-wrap: pretty; }
+    h1, h2, h3, h4 { text-wrap: balance; }
+
+    .container { margin-inline: var(--margin); }
+    .grid { display: grid; grid-template-columns: repeat(8, 1fr); column-gap: var(--gutter); }
+    .prose > * + * { margin-top: 20px; }
+    .muted { color: var(--muted); }
+
+    .text-link { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; color: var(--accent); border-bottom: 1px solid currentColor; line-height: 1.3; }
+    .text-link:hover { border-bottom-color: transparent; }
+
+    /* ---------- Закреплённая шапка с разделами (как в KYBBY) ---------- */
+    .case-header {
+      position: sticky; top: 0; z-index: 30;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+    }
+    .case-header__inner { display: flex; align-items: center; gap: 32px; height: var(--bar-h); }
+
+    .back {
+      position: relative; flex-shrink: 0;
+      display: grid; place-items: center;
+      width: 40px; height: 40px;
+      border: 2px solid var(--ink);
+      transition: background-color .2s, color .2s;
+    }
+    .back svg { width: 18px; height: 14px; }
+    .back:hover { background: var(--ink); color: var(--light); }
+    .back__tip {
+      position: absolute; left: 0; top: calc(100% + 10px);
+      padding: 6px 10px; white-space: nowrap;
+      background: var(--ink); color: var(--light);
+      font-size: 12px; font-weight: 500; line-height: 1.3;
+      opacity: 0; transform: translateY(-4px); pointer-events: none;
+      transition: opacity .15s, transform .15s;
+    }
+    .back:hover .back__tip, .back:focus-visible .back__tip { opacity: 1; transform: none; }
+
+    .case-nav {
+      flex: 1; min-width: 0; align-self: stretch;
+      display: flex; gap: 32px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .case-nav::-webkit-scrollbar { display: none; }
+    .case-nav a {
+      position: relative; flex-shrink: 0;
+      display: flex; align-items: center;
+      font-size: 14px; font-weight: 500; text-transform: uppercase;
+      color: var(--muted); transition: color .2s;
+    }
+    .case-nav a::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+      background: var(--accent); transform: scaleX(0); transform-origin: left;
+      transition: transform .25s;
+    }
+    .case-nav a:hover { color: var(--ink); }
+    .case-nav a[aria-current="true"] { color: var(--ink); }
+    .case-nav a[aria-current="true"]::after { transform: scaleX(1); }
+    .case-header__tag { flex-shrink: 0; font-size: 14px; font-weight: 500; color: var(--accent); }
+
+    .btns { display: flex; flex-wrap: wrap; gap: 16px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      height: 50px; padding: 0 28px;
+      font-weight: 500; font-size: 18px;
+      transition: background-color .2s, color .2s, border-color .2s;
+    }
+    .btn--primary { background: var(--accent); color: var(--light); }
+    .btn--primary:hover { background: #cf5118; }
+    .btn--ghost { border: 2px solid currentColor; }
+    .btn--ghost:hover { background: var(--ink); color: var(--light); border-color: var(--ink); }
+    .sec--dark .btn--ghost:hover, .sec--tint .btn--ghost:hover { background: var(--ink); }
+
+    /* ---------- Первый экран (как в KYBBY): шапка кейса, слева описание и кнопка, справа «Кратко» в рамке ---------- */
+    .hero { --title-fs: clamp(36px, 6.4vw, 96px); padding: 96px 0 120px; }
+    .hero__tag { font-weight: 500; font-size: 14px; color: var(--accent); }
+    .hero__title {
+      margin-top: calc(10px - 0.13em);                                /* видимо 16px от метки */
+      font-family: var(--display); font-weight: 800;
+      font-size: var(--title-fs); line-height: 1; letter-spacing: -0.03em;
+    }
+    .hero__subtitle {
+      margin-top: calc(var(--title-fs) * 0.2 + 16px - var(--title-fs) * 0.12 - 0.24em); /* видимо ~16px от хвостов букв «д», «у» */
+      font-family: var(--display); font-weight: 800;
+      font-size: clamp(22px, 2.2vw, 30px); line-height: 1.25; letter-spacing: -0.02em; color: var(--accent);
+    }
+    .chips { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { padding: 6px 12px; border: 1px solid var(--line); font-size: 14px; font-weight: 500; line-height: 1.3; }
+    /* «Кратко» — 3 колонки сетки у правого края; текст — всё остальное.
+       Между ними два гаттера (80px): заметно больше внутреннего отступа рамки 32px (правило внутреннего и внешнего) */
+    .hero__body { margin-top: 80px; display: grid; grid-template-columns: minmax(0, 1fr) calc(37.5% - 25px); column-gap: calc(var(--gutter) * 2); row-gap: 40px; align-items: stretch; }
+    .hero__intro { grid-column: 1; }
+    .summary { grid-column: 2; }
+    .hero__intro { display: flex; flex-direction: column; }
+    .hero__btns { margin-top: auto; padding-top: 48px; }
+    .summary { display: flex; border: 1px solid var(--muted); padding: 32px; }
+    .summary__list { flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; }
+    .summary__list dt { font-size: 14px; font-weight: 500; color: var(--muted); }
+    .summary__list dd { margin: 4px 0 0; font-weight: 700; font-size: 16px; line-height: 1.45; }
+    .hero__cover { margin-top: 80px; background: #fff; border: 1px solid var(--line); padding: 40px; }
+    .hero__cover img { width: 100%; max-width: 1000px; margin-inline: auto; }
+
+    /* ---------- Задача ---------- */
+    .task { background: var(--grey-bg); padding: 120px 0; }
+    .eyebrow { font-size: 14px; font-weight: 500; color: var(--accent); text-transform: uppercase; }
+    .task__lead {
+      grid-column: 1 / 7; margin-top: 16px;
+      font-family: var(--display); font-weight: 800; font-size: clamp(24px, 2.2vw, 32px); line-height: 1.3; letter-spacing: -0.02em;
+    }
+    /* Промежуток между «А» и «Б» — 80px */
+    .task__types { margin-top: 48px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 80px; row-gap: 40px; }
+    .type { border-top: 2px solid var(--ink); padding-top: 20px; }
+    .type__name { font-weight: 700; }
+    .type__name span { color: var(--accent); }
+    .type p:nth-child(2) { margin-top: 8px; }
+    .type p:nth-child(3) { margin-top: 8px; font-size: 16px; color: var(--muted); }
+
+    /* ---------- Процесс: этапы 01–03 ---------- */
+    .process { padding: 120px 0; }
+    .step + .step { margin-top: 120px; padding-top: 64px; border-top: 1px solid var(--line); }
+    /* Номер этапа — контурная цифра: отсылка к контурным вариантам иконок */
+    .step__num {
+      font-family: var(--display); font-weight: 800; font-size: 96px; line-height: 0.9; letter-spacing: -0.04em;
+      color: transparent; -webkit-text-stroke: 1.5px var(--accent);
+    }
+    .step__title { margin-top: 20px; font-family: var(--display); font-weight: 800; font-size: 40px; line-height: 1.15; letter-spacing: -0.02em; }
+    .step__text { margin-top: 28px; max-width: 760px; }
+
+    /* 01 — опись: счётчики и списки иконок */
+    /* Между группами — 120px: заметно больше, чем между колонками внутри списка (24px) */
+    .catalog { margin-top: 56px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 120px; }
+    .catalog__count { font-family: var(--display); font-weight: 800; font-size: 72px; line-height: 1; letter-spacing: -0.03em; color: var(--accent); }
+    .catalog__name { margin-top: 8px; font-weight: 700; }
+    .catalog__note { margin-top: 4px; font-size: 14px; color: var(--muted); }
+    .catalog__list { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); columns: 2; column-gap: 24px; counter-reset: item; font-size: 14px; line-height: 1.45; }
+    .catalog__list li { break-inside: avoid; padding: 3px 0 3px 32px; position: relative; counter-increment: item; }
+    .catalog__list li::before { content: counter(item, decimal-leading-zero); position: absolute; left: 0; color: var(--muted); }
+
+    /* 02 — ключевые решения первой концепции */
+    .moves { margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--muted); }
+    .moves > div { padding: 20px 20px 24px; }
+    .moves > div + div { border-left: 1px solid var(--line); }
+    .moves dt { font-size: 14px; font-weight: 500; color: var(--muted); }
+    .moves dd { margin-top: 8px; font-size: 16px; font-weight: 700; line-height: 1.4; }
+
+    /* 03 — вывод и список правок */
+    .verdict { margin-top: 32px; padding: 28px 32px; background: var(--tint-bg); color: var(--ink); }
+    .verdict span { display: block; font-size: 14px; font-weight: 500; color: var(--muted); }
+    .verdict p { margin-top: 8px; font-family: var(--display); font-weight: 800; font-size: 24px; line-height: 1.3; letter-spacing: -0.01em; }
+    .pivot { margin-top: 12px; border-top: 1px solid var(--line); } /* список ближе к своей подписи «Новые ориентиры» */
+    .pivot li { display: grid; grid-template-columns: 40px 1fr; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .pivot li::before { content: "→"; color: var(--accent); font-weight: 700; }
+    .pivot__label { margin-top: 40px; font-size: 14px; font-weight: 500; color: var(--muted); text-transform: uppercase; }
+
+    /* Заглушки под изображения. Замените <div class="ph">…</div> на <img src="…" alt="…"> */
+    .ph {
+      display: grid; place-items: center; padding: 24px; text-align: center; width: 100%; aspect-ratio: 16 / 9;
+      border: 1px dashed var(--line); color: var(--muted); font-size: 14px; font-weight: 500; line-height: 1.4;
+      background: repeating-linear-gradient(135deg, transparent 0 14px, rgba(51,51,51,.035) 14px 15px);
+    }
+    .fig { margin-top: 40px; }
+    .fig img { width: 100%; height: auto; }
+    .fig figcaption { margin-top: 12px; font-size: 14px; font-weight: 500; color: var(--muted); }
+    /* Референсы в один ряд одинаковой высоты: ширина каждой картинки — по её пропорциям, ничего не обрезается */
+    .refs { display: flex; gap: 16px; align-items: flex-start; }
+    .refs img { flex: var(--r) 1 0; min-width: 0; width: 100%; height: auto; aspect-ratio: var(--r); border: 1px solid var(--line); }
+
+    /* ---------- 04 Финальная система: два пака — герои блока ---------- */
+    .final { background: var(--dark-bg); color: var(--light); padding: 120px 0; }
+    .final .step__num { -webkit-text-stroke-color: var(--accent); }
+    .final__intro { margin-top: 20px; color: var(--light-muted); }
+    /* Два пака рядом; subgrid выравнивает заголовки, описания и верх картинок по одной линии */
+    .packs { margin-top: 64px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 80px; }
+    .pack { display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 0; }
+    .pack__title { font-family: var(--display); font-weight: 800; font-size: 24px; line-height: 1.2; letter-spacing: -0.02em; }
+    .pack__desc { margin-top: 12px; font-size: 16px; color: var(--light-muted); }
+    .pack__img { margin-top: 32px; align-self: start; }
+    .pack__img a { display: block; outline-offset: 4px; }
+    .pack__img img { width: 100%; height: auto; transition: opacity .2s; }
+    .pack__img a:hover img { opacity: .92; }
+
+    /* ---------- Итог ---------- */
+    .outro { background: var(--tint-bg); padding: 120px 0 24px; }
+    .outro__lead { grid-column: 1 / 7; margin-top: 16px; font-family: var(--display); font-weight: 800; font-size: clamp(22px, 2.5vw, 36px); line-height: 1.25; letter-spacing: -0.02em; }
+    .outro__cols { margin-top: 48px; row-gap: 20px; }
+    .outro__cols p:nth-child(1) { grid-column: 1 / 5; }
+    .outro__cols p:nth-child(2) { grid-column: 5 / 9; }
+    .footer { margin-top: 120px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; font-size: 14px; font-weight: 500; }
+    .footer a:hover { color: var(--accent); }
+
+    /* ---------- Адаптив ---------- */
+    @media (max-width: 1100px) {
+      .hero__body { grid-template-columns: 1fr; }
+      .hero__intro, .summary { grid-column: 1 / -1; }
+      .case-header__tag { display: none; }
+      .case-nav { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+                  mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); padding-right: 40px; }
+      .task__lead { grid-column: 1 / -1; }
+    }
+    @media (max-width: 860px) {
+      .hero { padding: 56px 0 80px; }
+      .hero__cover { margin-top: 56px; padding: 16px; }
+      .outro__cols p:nth-child(n), .outro__lead { grid-column: 1 / -1; }
+      .task, .process, .final { padding: 80px 0; }
+      .outro { padding-top: 80px; }
+      .task__types, .catalog { grid-template-columns: 1fr; }
+      .catalog { gap: 48px; }
+      .moves { grid-template-columns: 1fr 1fr; }
+      .moves > div:nth-child(3) { border-left: 0; }
+      .moves > div:nth-child(n+3) { border-top: 1px solid var(--line); }
+      .step + .step { margin-top: 80px; padding-top: 48px; }
+      .step__num { font-size: 72px; }
+      .step__title { font-size: 32px; }
+      .refs { flex-direction: column; }
+      .packs { grid-template-columns: 1fr; row-gap: 64px; }
+      .pack { grid-row: auto; grid-template-rows: none; }
+      .refs img { flex: none; }
+      .footer { margin-top: 80px; flex-direction: column; }
+    }
+    @media (max-width: 560px) {
+      body { font-size: 16px; }
+      .case-header__inner { gap: 20px; }
+      .case-nav { gap: 22px; }
+      .back { width: 36px; height: 36px; }
+      .summary { padding: 24px; }
+      .btn { flex: 1 1 100%; }
+      .moves { grid-template-columns: 1fr; }
+      .moves > div + div { border-left: 0; border-top: 1px solid var(--line); }
+      .catalog__list { columns: 1; }
+      .catalog__count { font-size: 56px; }
+      .verdict { padding: 20px; }
+      .verdict p { font-size: 17px; }
+      }
+  </style>
+</head>
+<body>
+
+  <!-- ===== ШАПКА (как в KYBBY) ===== -->
+  <header class="case-header">
+    <div class="container case-header__inner">
+      <a class="back" href="index.html#cases" aria-label="Все проекты">
+        <svg viewBox="0 0 18 14" fill="none" aria-hidden="true"><path d="M17 7H2M7.5 1.5L2 7L7.5 12.5" stroke="currentColor" stroke-width="2"/></svg>
+        <span class="back__tip" aria-hidden="true">Все проекты</span>
+      </a>
+      <nav class="case-nav" aria-label="Разделы кейса">
+        <a href="#task">Задача</a>
+        <a href="#set">Состав набора</a>
+        <a href="#direction">Направление</a>
+        <a href="#feedback">Обратная связь</a>
+        <a href="#system">Финальная система</a>
+        <a href="#outro">Итог</a>
+      </nav>
+      <span class="case-header__tag">кейс_02</span>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ===== ПЕРВЫЙ ЭКРАН (как в KYBBY) ===== -->
+    <div class="hero container">
+      <p class="hero__tag">кейс_02</p>
+      <h1 class="hero__title">Иконографика для&nbsp;Музея Москвы</h1>
+      <p class="hero__subtitle">Система функциональных и&nbsp;тематических иконок для&nbsp;проектов&nbsp;музея</p>
+      <ul class="chips">
+        <li class="chip">Визуальный дизайн</li>
+        <li class="chip">Система иконок</li>
+        <li class="chip">Adobe Illustrator</li>
+        <li class="chip">Figma</li>
+        <li class="chip">Реальный проект</li>
+      </ul>
+
+      <div class="hero__body">
+        <div class="hero__intro prose">
+          <p>В&nbsp;рамках стажировки в&nbsp;Музее Москвы я&nbsp;работала над&nbsp;системой иконографии: от&nbsp;определения необходимых иконок и&nbsp;поиска стилистического направления до&nbsp;двух финальных&nbsp;наборов.</p>
+          <p>Проект прошёл несколько итераций по&nbsp;обратной связи старшего дизайнера: первоначальное экспериментальное направление было переработано в&nbsp;более лаконичную чёрно-белую систему, связанную с&nbsp;визуальным языком&nbsp;музея.</p>
+          <div class="btns hero__btns">
+            <a class="btn btn--ghost" href="https://www.figma.com/design/IpMC5CSmRHYrk9XRVOnii3/projects-Sadikova?node-id=1436-175&t=K3UkJv92Yccubx91-1" target="_blank" rel="noopener">Figma ↗</a>
+          </div>
+        </div>
+
+        <aside class="summary">
+          <dl class="summary__list">
+            <div><dt>Роль</dt><dd>Графический дизайнер</dd></div>
+            <div><dt>Формат</dt><dd>Стажировка · Музей Москвы</dd></div>
+            <div><dt>Инструменты</dt><dd>Adobe Illustrator · Figma · ChatGPT</dd></div>
+            <div><dt>Результат</dt><dd>2 финальных пака иконок для&nbsp;дальнейшего использования музеем</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ===== ЗАДАЧА ===== -->
+    <section class="task" id="task" data-nav="task">
+      <div class="container">
+        <p class="eyebrow">Задача</p>
+        <div class="grid">
+          <p class="task__lead">Нужно было сформировать набор иконок для&nbsp;Музея Москвы двух типов: функциональных и&nbsp;тематических.</p>
+        </div>
+        <div class="task__types">
+          <div class="type">
+            <p class="type__name"><span>А</span> · Функциональные</p>
+            <p>Для&nbsp;интерфейсных действий и&nbsp;разделов</p>
+            <p>В&nbsp;исходной задаче: правила посещения, интернет-магазин и&nbsp;элементы&nbsp;интерфейса</p>
+          </div>
+          <div class="type">
+            <p class="type__name"><span>Б</span> · Тематические</p>
+            <p>Связанные с&nbsp;Москвой и&nbsp;городской средой</p>
+            <p>В&nbsp;исходной задаче: транспорт, архитектура, городские объекты, достопримечательности и&nbsp;другие узнаваемые элементы&nbsp;Москвы</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ПРОЦЕСС: этапы 01–03 ===== -->
+    <div class="container process">
+
+        <!-- 01 -->
+        <section class="step" id="set" data-nav="set">
+          <p class="step__num" aria-hidden="true">01</p>
+          <h2 class="step__title">Состав набора</h2>
+          <div class="step__text prose">
+            <p>Сначала я&nbsp;определила, какие именно иконки понадобятся системе, и&nbsp;разделила их на&nbsp;функциональные и&nbsp;тематические.</p>
+            <p>Задача была не&nbsp;просто нарисовать несколько знаков, а&nbsp;собрать единый визуальный язык, который можно будет расширять и&nbsp;использовать в&nbsp;разных&nbsp;проектах&nbsp;музея.</p>
+          </div>
+
+          <div class="catalog">
+            <div>
+              <p class="catalog__count">37</p>
+              <p class="catalog__name">функциональных иконок</p>
+              <p class="catalog__note">разделы и&nbsp;действия на&nbsp;сайте</p>
+              <ol class="catalog__list">
+                <li>правила посещения</li><li>билеты</li><li>корзина</li><li>сувенир</li><li>поиск</li><li>фильтр</li><li>избранное</li><li>профиль</li><li>вход</li><li>выход</li><li>подписка</li><li>новости</li><li>афиша</li><li>календарь</li><li>выставка</li><li>лекция</li><li>экскурсия</li><li>аудиогид</li><li>карта</li><li>маршрут</li><li>вопрос-ответ</li><li>сообщение</li><li>контакты</li><li>телефон</li><li>почта</li><li>часы работы</li><li>адрес</li><li>донат</li><li>партнёры</li><li>документ</li><li>язык</li><li>версия для&nbsp;слабовидящих</li><li>настройки</li><li>уведомления</li><li>загрузка</li><li>скачать</li><li>поделиться</li>
+              </ol>
+            </div>
+            <div>
+              <p class="catalog__count">27</p>
+              <p class="catalog__name">тематических иконок</p>
+              <p class="catalog__note">концепция&nbsp;— город, это&nbsp;то, что&nbsp;нас&nbsp;окружает</p>
+              <ol class="catalog__list">
+                <li>многоэтажка</li><li>арочное окно</li><li>балкон</li><li>фонарь</li><li>тротуарная плитка</li><li>строительный кран</li><li>буква «М» метро</li><li>схема линий метро</li><li>речной трамвайчик</li><li>трамвай</li><li>велосипед</li><li>пешеходный переход</li><li>река</li><li>мороженое</li><li>силуэт балерины</li><li>силуэт Москва-Сити</li><li>силуэт куполов</li><li>Лужники</li><li>табличка улицы</li><li>театр с&nbsp;колоннами</li><li>мост дугой</li><li>уличный музыкант</li><li>антенны на&nbsp;крыше</li><li>почтовый ящик</li><li>качели</li><li>кофейный стаканчик</li><li>билетик транспорта</li>
+              </ol>
+            </div>
+          </div>
+        </section>
+
+        <!-- 02 -->
+        <section class="step" id="direction" data-nav="direction">
+          <p class="step__num" aria-hidden="true">02</p>
+          <h2 class="step__title">Поиск визуального направления</h2>
+          <div class="step__text prose">
+            <p>Незадолго до&nbsp;работы над&nbsp;иконографикой на&nbsp;сайте Музея Москвы обновили типографику: в&nbsp;интерфейсе появился Agipo Mono&nbsp;— моноширинный шрифт с&nbsp;тонким начертанием и&nbsp;выраженным печатным характером. Мне хотелось, чтобы будущая система иконок поддерживала этот визуальный язык, поэтому в&nbsp;качестве одного из&nbsp;ключевых приёмов я&nbsp;выбрала эффект&nbsp;печатной&nbsp;фактуры.</p>
+            <p>Первую концепцию построила на&nbsp;эстетике Кандинского и&nbsp;авангардной живописи&nbsp;— с&nbsp;геометричными формами, ритмом и&nbsp;простыми композициями. Чтобы не&nbsp;перегружать систему, сократила палитру до&nbsp;серого и&nbsp;розового, а&nbsp;печатная фактура помогла связать иконки с&nbsp;обновлённой типографикой&nbsp;сайта.</p>
+          </div>
+
+          <dl class="moves">
+            <div><dt>Приём</dt><dd>Печатная фактура</dd></div>
+            <div><dt>Референс</dt><dd>Кандинский и&nbsp;авангард</dd></div>
+            <div><dt>Палитра</dt><dd>Серый и&nbsp;розовый</dd></div>
+          </dl>
+
+          <div class="step__text prose" style="margin-top:40px">
+            <p>На&nbsp;основе этого направления с&nbsp;помощью ChatGPT собрала первый эскизный вариант иконок и&nbsp;отправила его старшему дизайнеру для&nbsp;обратной&nbsp;связи.</p>
+          </div>
+          <!-- Первый эскизный пак: images/museum/sketch.jpg -->
+          <figure class="fig">
+            <img src="images/museum/sketch.jpg" alt="Первая концепция иконок: серо-розовые геометричные знаки с печатной фактурой — солнце над водой, дома, велосипед, мороженое, метро, трамвай, строительный кран, речной трамвайчик, балерина, купола" width="2400" height="868" loading="lazy">
+            <figcaption>Первая концепция: геометрия в&nbsp;духе авангарда, серо-розовая палитра, печатная фактура</figcaption>
+          </figure>
+        </section>
+
+        <!-- 03 -->
+        <section class="step" id="feedback" data-nav="feedback">
+          <p class="step__num" aria-hidden="true">03</p>
+          <h2 class="step__title">Обратная связь и&nbsp;смена направления</h2>
+          <div class="step__text prose">
+            <p>После первой итерации я&nbsp;получила комментарии старшего&nbsp;дизайнера.</p>
+          </div>
+          <div class="verdict">
+            <span>Главный вывод</span>
+            <p>Систему нужно сделать значительно проще и&nbsp;ближе к&nbsp;существующему визуальному&nbsp;языку&nbsp;музея.</p>
+          </div>
+
+          <p class="pivot__label">Новые ориентиры</p>
+          <ul class="pivot">
+            <li>простые формы в&nbsp;духе Iconwerk</li>
+            <li>связь с&nbsp;рубленой гротескной типографикой</li>
+            <li>отказ от&nbsp;цвета</li>
+            <li>более локальные и&nbsp;узнаваемые московские образы</li>
+            <li>работа с&nbsp;глифами</li>
+            <li>несколько вариантов характера начертания&nbsp;— заливка, тонкий и&nbsp;более жирный контур</li>
+          </ul>
+
+          <!-- Три референса: images/museum/ref-1.jpg, ref-2.jpg, ref-3.jpg. --r = ширина / высота картинки -->
+          <figure class="fig">
+            <div class="refs">
+              <img style="--r: 2.055" src="images/museum/ref-1.jpg" alt="Референс: простые чёрные пиктограммы — стрелки, велосипед под навесом, столовые приборы, кружка, колокол, гроза, яблоко, волны" width="1200" height="584" loading="lazy">
+              <img style="--r: 1.175" src="images/museum/ref-2.jpg" alt="Референс: надпись «Экскурсбюро музея Москвы», набранная рубленым гротеском вперемешку с глифами — волны, рупор, глаз, плюс, метка, стрелка" width="926" height="788" loading="lazy">
+              <img style="--r: 1.732" src="images/museum/ref-3.jpg" alt="Референс: «Шрифт и глифы» — набор знаков в жирном гротеске: треугольник, ромб, стрелки, звёздочки, дроби, амперсанд, номер, рупор" width="1280" height="739" loading="lazy">
+            </div>
+            <figcaption>Обновлённое направление: простые чёрно-белые формы, глифовый характер и&nbsp;визуальная связь с&nbsp;типографикой музея.</figcaption>
+          </figure>
+
+          <div class="step__text prose" style="margin-top:40px">
+            <p>На&nbsp;основе этих ориентиров я&nbsp;отказалась от&nbsp;первоначальной цветной концепции и&nbsp;перешла к&nbsp;более лаконичной системе. Новые иконки отрисовала в&nbsp;Adobe Illustrator, а&nbsp;затем доработала и&nbsp;собрала в&nbsp;единые&nbsp;паки&nbsp;в&nbsp;Figma.</p>
+          </div>
+        </section>
+
+    </div>
+
+    <!-- ===== 04 ФИНАЛЬНАЯ СИСТЕМА ===== -->
+    <section class="final" id="system" data-nav="system">
+      <div class="container">
+        <p class="step__num" aria-hidden="true">04</p>
+        <h2 class="step__title">Финальная система</h2>
+        <p class="final__intro">В&nbsp;результате получилось два пака.</p>
+
+        <!-- Два пака рядом: images/museum/pack-thematic.png и pack-functional.png -->
+        <div class="packs">
+          <article class="pack">
+            <h3 class="pack__title">Тематические иконки</h3>
+            <p class="pack__desc">Образы Москвы и&nbsp;городской среды: архитектура, метро, транспорт, городские объекты, культурные и&nbsp;узнаваемые московские&nbsp;символы.</p>
+            <figure class="pack__img">
+              <a href="images/museum/pack-thematic.png" target="_blank" rel="noopener">
+                <img src="images/museum/pack-thematic.png" alt="Финальный тематический пак: многоэтажка, арочное окно, фонарь, плитка, кран, Москва-Сити, высотка, мороженое, театр, Лужники, буква «М» метро, балерина, велосипед, табличка «Зубовский, 2», схема метро, качели, купола, мост, кофе, почтовый ящик, река, билетик, пешеходный переход" width="1400" height="1625" loading="lazy">
+              </a>
+            </figure>
+          </article>
+          <article class="pack">
+            <h3 class="pack__title">Функциональные иконки</h3>
+            <p class="pack__desc">Знаки для&nbsp;интерфейсных и&nbsp;сервисных сценариев: поиск, профиль, карта, контакты, загрузка, мероприятия, билеты&nbsp;и&nbsp;другие&nbsp;действия.</p>
+            <figure class="pack__img">
+              <a href="images/museum/pack-functional.png" target="_blank" rel="noopener">
+                <img src="images/museum/pack-functional.png" alt="Финальный функциональный пак: сувенир, камера, корзина, кофе, билеты, удаление, фильтр, избранное, профиль, поиск, вход, выход, уведомления, новости, календарь, выставка, часы работы, карта, вопрос-ответ, телефон, почта, версия для слабовидящих, поделиться, адрес, настройки, загрузка, лекция, экскурсия, аудиогид, донат, партнёры, документ, язык, маршрут" width="1400" height="2031" loading="lazy">
+              </a>
+            </figure>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ИТОГ ===== -->
+    <section class="outro" id="outro" data-nav="outro">
+      <div class="container">
+        <p class="eyebrow">Итог</p>
+        <div class="grid">
+          <p class="outro__lead">По&nbsp;итогам нескольких итераций первоначальное экспериментальное направление превратилось в&nbsp;более лаконичную и&nbsp;универсальную систему&nbsp;иконографии.</p>
+        </div>
+        <div class="grid outro__cols">
+          <p>Я&nbsp;подготовила два согласованных набора&nbsp;— тематический и&nbsp;функциональный, которые были переданы команде Музея Москвы для&nbsp;дальнейшего использования&nbsp;в&nbsp;проектах.</p>
+          <p>Для&nbsp;меня этот проект был особенно ценен опытом работы внутри реальной айдентики бренда и&nbsp;обратной связью старшего дизайнера: решение менялось не&nbsp;ради стилистического эксперимента, а&nbsp;в&nbsp;соответствии с&nbsp;контекстом музея и&nbsp;будущими сценариями&nbsp;использования.</p>
+        </div>
+
+        <footer class="footer">
+          <p>© 2026 Дарья Садикова&nbsp;—&nbsp;UX/UI&nbsp;дизайнер</p>
+          <a href="index.html#cases">← Все проекты</a>
+        </footer>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    (function () {
+      var header = document.querySelector('.case-header');
+      var nav = document.querySelector('.case-nav');
+      var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+      var sections = Array.prototype.slice.call(document.querySelectorAll('[data-nav]'));
+      var current = null;
+      function update() {
+        var line = header.offsetHeight + window.innerHeight * 0.3;
+        var active = null;
+        sections.forEach(function (s) { if (s.getBoundingClientRect().top <= line) active = s.dataset.nav; });
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) active = sections[sections.length - 1].dataset.nav;
+        if (active === current) return;
+        current = active;
+        links.forEach(function (a) {
+          if (a.getAttribute('href') === '#' + active) {
+            a.setAttribute('aria-current', 'true');
+            if (nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: a.offsetLeft - nav.offsetLeft - 16, behavior: 'smooth' });
+          } else a.removeAttribute('aria-current');
+        });
+      }
+      var ticking = false;
+      window.addEventListener('scroll', function () {
+        if (!ticking) { ticking = true; requestAnimationFrame(function () { update(); ticking = false; }); }
+      }, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    })();
+  </script>
+</body>
+</html>

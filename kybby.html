@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KYBBY — AI-сервис для создания бренд-комплекта · Дарья Садикова</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Manrope:wght@800&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- Шрифты (те же, что на главной) ---------- */
+    @font-face { font-family: "Manrope"; src: local("Manrope ExtraBold"), local("Manrope-ExtraBold"), url("fonts/Manrope-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; font-display: swap; }
+    @font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono Regular"), local("JetBrainsMono-Regular"), url("fonts/JetBrainsMono-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono Medium"), local("JetBrainsMono-Medium"), url("fonts/JetBrainsMono-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+    @font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono Bold"), local("JetBrainsMono-Bold"), url("fonts/JetBrainsMono-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono ExtraBold"), local("JetBrainsMono-ExtraBold"), url("fonts/JetBrainsMono-ExtraBold.woff2") format("woff2"); font-weight: 800; font-style: normal; font-display: swap; }
+
+    /* ---------- Токены (как на главной) ---------- */
+    :root {
+      --bg: #efefef;
+      --ink: #333333;
+      --muted: rgba(51, 51, 51, 0.6);
+      --line: rgba(51, 51, 51, 0.4);
+      --accent: #e45f21;
+      --grey-bg: #cdcdcd;
+      --dark-bg: #333333;
+      --dark-line: #545454;
+      --light: #efefef;
+      --light-muted: rgba(239, 239, 239, 0.6);
+      --tint-bg: rgba(228, 95, 33, 0.3);
+
+      --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      --display: "Manrope", "Helvetica Neue", Arial, sans-serif;
+
+      --margin: 120px;
+      --gutter: 40px;
+      --header-h: 64px;
+    }
+    @media (max-width: 1240px) { :root { --margin: 64px; } }
+    @media (max-width: 560px)  { :root { --margin: 24px; --gutter: 16px; --header-h: 56px; } }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: var(--header-h); }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: var(--mono); font-size: 18px; line-height: 1.5;
+    }
+    p, h1, h2, h3, h4, ul, ol, dl, dd, figure { margin: 0; padding: 0; }
+    ul, ol { list-style: none; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Ровный край абзацев: браузер сам подбирает переносы, без «обрубков» в последней строке */
+    p, li, dd, figcaption { text-wrap: pretty; }
+    h1, h2, h3, h4 { text-wrap: balance; }
+    /* Исключения: здесь строки заполняются как обычно, без выравнивания по длине.
+       Добавьте класс .no-balance любому элементу, чтобы отключить выравнивание и у него */
+    .hyp h4, .no-balance { text-wrap: wrap; }
+    img { display: block; max-width: 100%; }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+    .container { margin-inline: var(--margin); }
+    .grid { display: grid; grid-template-columns: repeat(8, 1fr); column-gap: var(--gutter); }
+
+    /* ---------- Закреплённая шапка ---------- */
+    .case-header {
+      position: sticky; top: 0; z-index: 30;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+    }
+    .case-header__inner { display: flex; align-items: center; gap: 32px; height: var(--header-h); }
+
+    .back {
+      position: relative; flex-shrink: 0;
+      display: grid; place-items: center;
+      width: 40px; height: 40px;
+      border: 2px solid var(--ink);
+      transition: background-color .2s, color .2s;
+    }
+    .back svg { width: 18px; height: 14px; }
+    .back:hover { background: var(--ink); color: var(--light); }
+    .back__tip {
+      position: absolute; left: 0; top: calc(100% + 10px);
+      padding: 6px 10px; white-space: nowrap;
+      background: var(--ink); color: var(--light);
+      font-size: 12px; font-weight: 500; line-height: 1.3;
+      opacity: 0; transform: translateY(-4px); pointer-events: none;
+      transition: opacity .15s, transform .15s;
+    }
+    .back:hover .back__tip, .back:focus-visible .back__tip { opacity: 1; transform: none; }
+
+    .case-nav {
+      flex: 1; min-width: 0; align-self: stretch;
+      display: flex; gap: 32px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .case-nav::-webkit-scrollbar { display: none; }
+    .case-nav a {
+      position: relative; flex-shrink: 0;
+      display: flex; align-items: center;
+      font-size: 14px; font-weight: 500; text-transform: uppercase;
+      color: var(--muted); transition: color .2s;
+    }
+    .case-nav a::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+      background: var(--accent); transform: scaleX(0); transform-origin: left;
+      transition: transform .25s;
+    }
+    .case-nav a:hover { color: var(--ink); }
+    .case-nav a[aria-current="true"] { color: var(--ink); }
+    .case-nav a[aria-current="true"]::after { transform: scaleX(1); }
+    .case-header__tag { flex-shrink: 0; font-size: 14px; font-weight: 500; color: var(--accent); }
+
+    /* ---------- Общие элементы ---------- */
+    section { padding: 120px 0; }
+    .sec--grey { background: var(--grey-bg); }
+    .sec--dark { background: var(--dark-bg); color: var(--light); }
+    .sec--tint { background: var(--tint-bg); }
+
+    .label { display: flex; align-items: center; gap: 8px; }
+    .label__num {
+      display: grid; place-items: center; width: 32px; height: 32px;
+      background: var(--accent); color: var(--light); font-weight: 500; font-size: 16px; line-height: 1;
+    }
+    .label__text { font-weight: 500; font-size: 14px; color: var(--muted); text-transform: uppercase; }
+    .sec--dark .label__text { color: var(--light); }
+
+    .sec-title {
+      margin-top: 16px; /* метка и заголовок — одна группа: ближе друг к другу, чем заголовок к тексту (28px) */
+      font-family: var(--display); font-weight: 800;
+      font-size: 40px; line-height: 1.2; letter-spacing: -0.02em; text-transform: uppercase;
+    }
+    .lead { margin-top: 28px; max-width: 780px; }
+
+    /* Подраздел: заголовок слева, текст справа */
+    .sub { margin-top: 64px; padding-top: 40px; border-top: 1px solid var(--line); row-gap: 24px; }
+    .sec--dark .sub { border-color: var(--dark-line); }
+    .sub__head { grid-column: 1 / 4; }
+    .sub__body { grid-column: 4 / 9; }
+    .sub__full { grid-column: 1 / -1; }
+    h3 {
+      font-family: var(--display); font-weight: 800;
+      font-size: 24px; line-height: 1.25; letter-spacing: -0.02em;
+    }
+    .prose > * + * { margin-top: 20px; }
+    .muted { color: var(--muted); }
+    .nobr { white-space: nowrap; } /* слово с дефисом не разрывается по строкам */
+    .sec--dark .muted { color: var(--light-muted); }
+
+    .text-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-weight: 500; color: var(--accent);
+      border-bottom: 1px solid currentColor; line-height: 1.3;
+    }
+    .text-link:hover { border-bottom-color: transparent; }
+
+    .btns { display: flex; flex-wrap: wrap; gap: 16px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      height: 50px; padding: 0 28px;
+      font-weight: 500; font-size: 18px;
+      transition: background-color .2s, color .2s, border-color .2s;
+    }
+    .btn--primary { background: var(--accent); color: var(--light); }
+    .btn--primary:hover { background: #cf5118; }
+    .btn--ghost { border: 2px solid currentColor; }
+    .btn--ghost:hover { background: var(--ink); color: var(--light); border-color: var(--ink); }
+    .sec--dark .btn--ghost:hover, .sec--tint .btn--ghost:hover { background: var(--ink); }
+
+    .square { display: inline-block; width: 9px; height: 9px; background: var(--accent); flex-shrink: 0; }
+
+    /* Заглушки под изображения. Замените <div class="ph">…</div> на <img src="…" alt="…"> */
+    .ph {
+      display: grid; place-items: center; padding: 24px; text-align: center;
+      aspect-ratio: 16 / 9; width: 100%;
+      border: 1px dashed var(--line); color: var(--muted);
+      font-size: 14px; font-weight: 500; line-height: 1.4;
+      background: repeating-linear-gradient(135deg, transparent 0 14px, rgba(51,51,51,.035) 14px 15px);
+    }
+    .sec--dark .ph { border-color: rgba(239,239,239,.3); color: var(--light-muted);
+      background: repeating-linear-gradient(135deg, transparent 0 14px, rgba(239,239,239,.04) 14px 15px); }
+    .fig { margin-top: 40px; }
+    .fig img { width: 100%; height: auto; }
+    .fig figcaption { margin-top: 12px; font-size: 14px; font-weight: 500; color: var(--muted); }
+    .sec--dark .fig figcaption { color: var(--light-muted); }
+
+    /* Черновые пометки, которые нужно заполнить */
+    .todo { color: var(--accent); border-bottom: 1px dashed currentColor; }
+
+    /* ---------- HERO кейса ---------- */
+    /* Шапка кейса: метка, название, подзаголовок и теги — одна плотная группа (видимые промежутки 16 / 20 / 28px),
+       а от неё до основного текста — 80px. Отступы считаются по видимым буквам, а не по рамкам строк:
+       у крупного шрифта над и под буквами есть пустое место, его вычитаем (в em, чтобы работало на любом размере) */
+    .hero { --title-fs: clamp(72px, 11vw, 160px); padding: 96px 0 120px; }
+    .hero__tag { font-weight: 500; font-size: 14px; color: var(--accent); }
+    .hero__title {
+      margin-top: calc(10px - 0.13em);                  /* видимо 16px от метки */
+      font-family: var(--display); font-weight: 800;
+      font-size: var(--title-fs); line-height: 0.95; letter-spacing: -0.03em;
+    }
+    .hero__subtitle {
+      margin-top: calc(20px - var(--title-fs) * 0.1 - 0.24em);   /* видимо 20px от низа KYBBY */
+      font-family: var(--display); font-weight: 800;
+      font-size: clamp(24px, 2.4vw, 34px); line-height: 1.2; letter-spacing: -0.02em;
+      color: var(--accent);
+    }
+    .chips { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { padding: 6px 12px; border: 1px solid var(--line); font-size: 14px; font-weight: 500; line-height: 1.3; }
+
+    /* Текст с кнопками и блок «Кратко» одной высоты: верх и низ совпадают */
+    .hero__body { margin-top: 80px; align-items: stretch; row-gap: 40px; } /* внешний отступ группы — заметно больше внутренних */
+    /* «Кратко» шире на одну колонку влево (4 из 8), чтобы «Роль» помещалась в одну строку; справа блок по-прежнему упирается в край сетки */
+    /* «Кратко» — 3 колонки сетки (37.5% − 25px), но не уже 488px, чтобы роль «… · Разработчик» вставала в одну строку;
+       расширяется влево, правый край остаётся на краю сетки. Текст слева занимает остальное */
+    .hero__body { grid-template-columns: minmax(0, 1fr) max(488px, 37.5% - 25px); column-gap: calc(var(--gutter) * 2); } /* два гаттера: больше внутреннего отступа рамки 32px */
+    .hero__intro { grid-column: 1; display: flex; flex-direction: column; }
+    .hero__intro > p { max-width: 62ch; } /* ширина строки — 62 знака: «логотипы» и «аналогов» уходят на следующую строку */
+    .summary { grid-column: 2; display: flex; border: 1px solid var(--muted); padding: 32px; }
+    .summary__list { flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; }
+    .summary__list dt { font-size: 14px; font-weight: 500; color: var(--muted); }
+    .summary__list dd { margin: 4px 0 0; font-weight: 700; font-size: 16px; line-height: 1.45; }
+    .hero__btns { margin-top: auto; padding-top: 48px; }
+    .hero__cover { margin-top: 80px; }
+    .hero__cover img, .hero__cover .ph { width: 100%; aspect-ratio: 1200 / 576; object-fit: cover; object-position: top; background: #2b2b2b; }
+
+    /* ---------- Задача / Результат ---------- */
+    .duo { margin-top: 60px; display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--muted); }
+    .duo > div { padding: 40px; }
+    .duo > div + div { border-left: 1px solid var(--line); }
+    .duo h3 { margin-bottom: 20px; }
+
+    /* ---------- Гипотезы ---------- */
+    .hyps { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: var(--gutter); }
+    /* subgrid: номер, заголовок, текст и «Решение» соседних карточек стоят на одних уровнях */
+    .hyp {
+      display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; align-content: start;
+      border: 1px solid var(--muted); padding: 32px;
+    }
+    .hyp__num { font-size: 14px; font-weight: 500; color: var(--accent); }
+    .hyp h4 { margin-top: 12px; font-weight: 700; font-size: 18px; line-height: 1.4; }
+    .hyp__text { margin-top: 16px; }
+    .hyp__solution { padding-top: 24px; }
+    .hyp__solution > div { padding-top: 20px; border-top: 1px solid var(--line); }
+    .hyp__solution span { display: block; font-size: 14px; font-weight: 500; color: var(--accent); margin-bottom: 8px; }
+
+    /* Цепочка сценария */
+    /* Шаги сценария: линия с маркерами, как таймлайн опыта на главной */
+    .steps { margin-top: 16px; /* шаги ближе к вводной фразе с двоеточием, чем абзацы друг к другу */ display: grid; grid-template-columns: repeat(var(--n, 5), 1fr); }
+    .steps li { position: relative; padding: 28px 16px 0 0; }
+    .steps li::before { /* маркер */
+      content: ""; position: absolute; left: 0; top: 0;
+      width: 9px; height: 9px; background: var(--accent);
+    }
+    .steps li:not(:last-child)::after { /* линия до следующего шага */
+      content: ""; position: absolute; left: 17px; right: 8px; top: 4px;
+      height: 1px; background: var(--line);
+    }
+    .steps li:last-child { padding-right: 0; }
+    .steps + p { margin-top: 40px; } /* отступ от шагов до ссылки «Подробнее…» */
+    .steps__num { display: block; font-size: 14px; font-weight: 500; color: var(--accent); }
+    .steps__label { display: block; margin-top: 4px; font-weight: 700; font-size: 16px; line-height: 1.35; }
+
+    .quote {
+      margin-top: 40px; padding-left: 24px; border-left: 4px solid var(--accent);
+      font-family: var(--display); font-weight: 800;
+      font-size: clamp(24px, 2.2vw, 32px); line-height: 1.25; letter-spacing: -0.02em;
+    }
+
+
+    /* ---------- Таблица ТЗ ---------- */
+    .spec { margin-top: 40px; border: 1px solid var(--muted); }
+    .spec__row { display: grid; grid-template-columns: repeat(8, 1fr); column-gap: var(--gutter); padding: 32px; }
+    .spec__row + .spec__row { border-top: 1px solid var(--line); }
+    .spec__row dt { grid-column: 1 / 4; }
+    .spec__row dd { grid-column: 4 / 9; font-size: 16px; }
+    .spec__title { font-family: var(--display); font-weight: 800; font-size: 22px; line-height: 1.25; letter-spacing: -0.02em; }
+    .spec__q { margin-top: 12px; font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--muted); }
+    .spec__q li + li { margin-top: 4px; }
+    .spec__tech { display: grid; grid-template-columns: max-content 1fr; gap: 8px 20px; }
+    .spec__tech dt { grid-column: auto; font-weight: 500; color: var(--muted); }
+    .spec__tech dd { grid-column: auto; font-weight: 700; }
+    .spec dd > * + * { margin-top: 16px; }
+
+    /* Скриншот опроса */
+    .survey img { width: 100%; height: auto; }
+    /* подпись вынесена из потока, чтобы низ карточек совпадал с низом скриншота */
+    .test-split .survey { position: relative; align-self: start; }
+    .test-split .survey figcaption { position: absolute; top: 100%; left: 0; }
+    .survey figcaption { margin-top: 12px; font-size: 14px; font-weight: 500; color: var(--muted); }
+
+    /* Скриншот опроса слева, карточки «проблема → решение» справа; карточки тянутся на высоту скриншота */
+    .test-split { margin-top: 40px; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--gutter); align-items: stretch; }
+    .test-split .insights { margin-top: 0; gap: 24px; } /* промежуток между карточками ≥ их внутреннего отступа */
+    .test-split .insight { padding: 18px 24px; font-size: 15px; line-height: 1.45; }
+    .test-split .insight { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .test-split .insight__head { grid-template-columns: 1fr; gap: 12px; }
+    .test-split .insight__arrow { display: none; }
+    .test-split .insight__head > div + div { padding-top: 12px; border-top: 1px solid var(--line); }
+    .test-split .insight__head span { margin-bottom: 4px; }
+
+    /* ---------- Финальные макеты: одна картинка-коллаж ---------- */
+    .screens-collage > a { display: block; border: 1px solid var(--dark-line); transition: border-color .2s; }
+    .screens-collage > a:hover { border-color: var(--accent); }
+    .screens-collage .scheme__meta { color: var(--light-muted); }
+
+    /* ---------- Вайрфреймы: ряд картинок одной ширины, выровнены по верху ---------- */
+    .wf { margin-top: 40px; display: flex; gap: var(--gutter); align-items: flex-start; }
+    .wf__item { flex: 1 1 0; min-width: 0; }
+    .wf__item a { display: block; border: 1px solid var(--line); transition: border-color .2s; }
+    .wf__item a:hover { border-color: var(--accent); }
+    .wf__item img { width: 100%; height: auto; aspect-ratio: var(--r); }
+    .wf__item figcaption { margin-top: 12px; font-size: 14px; font-weight: 500; color: var(--muted); }
+    .wf__more { margin-top: 32px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 32px; font-size: 14px; }
+
+    /* ---------- AS-IS / TO-BE ---------- */
+    .compare__tag { display: inline-block; padding: 4px 10px; margin-bottom: 16px; font-size: 14px; font-weight: 700; border: 2px solid var(--ink); }
+    .compare__tag--to { background: var(--accent); border-color: var(--accent); color: var(--light); }
+
+    /* BPMN-схемы: на всю ширину, на узких экранах листаются вбок */
+    .scheme { grid-column: 1 / -1; margin-top: 16px; }
+    .scheme__scroll { overflow-x: auto; border: 1px solid var(--line); background: #fff; }
+    .scheme__scroll img { width: 100%; min-width: 900px; height: auto; }
+    .scheme__meta { margin-top: 12px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 14px; font-weight: 500; color: var(--muted); }
+    .scheme__hint { display: none; }
+    .scheme__links { display: flex; flex-wrap: wrap; gap: 12px 32px; }
+
+    /* ---------- Цифры ---------- */
+    .stats { display: flex; flex-wrap: wrap; gap: 24px 64px; }
+    .stat__num { font-family: var(--display); font-weight: 800; font-size: 64px; line-height: 1; letter-spacing: -0.03em; color: var(--accent); }
+    .stat__cap { margin-top: 8px; font-size: 14px; font-weight: 500; }
+
+    /* ---------- Макеты ---------- */
+    .screens { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px var(--gutter); }
+    .screens .fig { margin-top: 0; }
+    .screens .fig--wide { grid-column: 1 / -1; }
+
+    /* ---------- Юзабилити-выводы ---------- */
+    .insights { margin-top: 40px; display: flex; flex-direction: column; gap: 40px; }
+    .insight { border: 1px solid var(--muted); padding: 32px; }
+    .insight__head { display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; align-items: start; }
+    .insight__head span { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: var(--accent); }
+    .insight__arrow { font-weight: 700; color: var(--accent); font-size: 24px; line-height: 1; padding-top: 28px; }
+    .insight__ba { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: var(--gutter); }
+    .insight__ba .ph { aspect-ratio: 16 / 10; }
+
+    /* ---------- Итог и футер ---------- */
+    .outro .btns { margin-top: 48px; }
+    .footer {
+      margin-top: 120px; padding-top: 24px; border-top: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      font-weight: 500; font-size: 14px;
+    }
+    .footer a:hover { color: var(--accent); }
+
+    /* ---------- Адаптив ---------- */
+    @media (max-width: 1100px) {
+      .hero__body { grid-template-columns: 1fr; }
+      .hero__intro, .summary { grid-column: 1 / -1; }
+      .sub__head, .sub__body { grid-column: 1 / -1; }
+      .case-header__tag { display: none; }
+      /* мягкое затухание справа — видно, что меню прокручивается */
+      .case-nav { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+                  mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); padding-right: 40px; }
+    }
+    @media (max-width: 860px) {
+      section { padding: 80px 0; }
+      .hero { padding: 56px 0 80px; }
+      .duo, .hyps, .screens, .insight__ba { grid-template-columns: 1fr; }
+      .scheme__hint { display: inline; }
+      .wf { flex-direction: column; gap: 32px; }
+      .test-split { grid-template-columns: 1fr; }
+      .test-split .survey figcaption { position: static; }
+      .wf__item { width: 100%; }
+      .spec__row { grid-template-columns: 1fr; row-gap: 16px; padding: 24px; }
+      .spec__row dt, .spec__row dd { grid-column: 1 / -1; }
+      .spec__tech { grid-template-columns: 1fr; gap: 2px; }
+      .spec__tech dd + dt { margin-top: 10px; }
+      .duo > div + div { border-left: 0; border-top: 1px solid var(--line); }
+      .steps { grid-template-columns: 1fr; }
+      .steps li { padding: 0 0 20px 28px; display: flex; gap: 12px; align-items: baseline; }
+      .steps li::before { top: 6px; }
+      .steps li:not(:last-child)::after { left: 4px; right: auto; top: 21px; bottom: 2px; width: 1px; height: auto; }
+      .steps__label { margin-top: 0; }
+      .insight__head { grid-template-columns: 1fr; gap: 16px; }
+      .insight__arrow { padding-top: 0; transform: rotate(90deg); width: max-content; }
+      .sub { margin-top: 48px; padding-top: 32px; }
+      .fig, .hyps, .screens, .insights { margin-top: 32px; }
+      .hero__cover { margin-top: 56px; }
+      .footer { margin-top: 80px; flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 560px) {
+      body { font-size: 16px; }
+      .case-header__inner { gap: 20px; }
+      .case-nav { gap: 22px; }
+      .back { width: 36px; height: 36px; }
+      .sec-title { font-size: 32px; }
+      h3 { font-size: 22px; }
+      .duo > div, .hyp, .summary, .insight { padding: 24px; }
+      .btn { flex: 1 1 100%; }
+      .stat__num { font-size: 52px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== ШАПКА ===== -->
+  <header class="case-header">
+    <div class="container case-header__inner">
+      <a class="back" href="index.html#cases" aria-label="Все проекты">
+        <svg viewBox="0 0 18 14" fill="none" aria-hidden="true"><path d="M17 7H2M7.5 1.5L2 7L7.5 12.5" stroke="currentColor" stroke-width="2"/></svg>
+        <span class="back__tip" aria-hidden="true">Все проекты</span>
+      </a>
+      <nav class="case-nav" aria-label="Разделы кейса">
+        <a href="#task">Задача</a>
+        <a href="#research">Исследование</a>
+        <a href="#process">AS-IS / TO-BE</a>
+        <a href="#design">Проектирование</a>
+        <a href="#interface">Интерфейс</a>
+        <a href="#testing">Тестирование</a>
+        <a href="#outro">Итог</a>
+      </nav>
+      <span class="case-header__tag">кейс_01</span>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ===== HERO ===== -->
+    <div class="hero container">
+      <p class="hero__tag">кейс_01</p>
+      <h1 class="hero__title">KYBBY</h1>
+      <p class="hero__subtitle">AI-сервис для&nbsp;создания бренд-комплекта</p>
+      <ul class="chips">
+        <li class="chip">Продуктовый дизайн</li>
+        <li class="chip">UX/UI-дизайн</li>
+        <li class="chip">ИИ</li>
+        <li class="chip">Веб-приложение</li>
+        <li class="chip">Разработка</li>
+      </ul>
+
+      <div class="grid hero__body">
+        <div class="hero__intro prose">
+          <p>KYBBY&nbsp;— веб-приложение для&nbsp;создания первичного бренд-комплекта с&nbsp;помощью нейросетевых моделей. Пользователь задаёт параметры бренда, палитру и&nbsp;референсы, а&nbsp;затем может сгенерировать логотипы, иконки, паттерны и&nbsp;иллюстрации и&nbsp;собрать результаты внутри&nbsp;одного&nbsp;проекта.</p>
+          <p>Я&nbsp;самостоятельно прошла полный цикл&nbsp;— от&nbsp;анализа проблемы, аналогов и&nbsp;проектирования пользовательских сценариев до&nbsp;<span class="nobr">UX/UI-дизайна</span>, разработки и&nbsp;тестирования работающего&nbsp;продукта.</p>
+          <div class="btns hero__btns">
+            <a class="btn btn--primary" href="https://kybby-app.amvera.io" target="_blank" rel="noopener">Открыть сервис ↗</a>
+            <a class="btn btn--ghost" href="https://www.figma.com/design/0cdw89dPZyMqnb1P5KsQLv/KYBBY?node-id=0-1&amp;t=A44T61yZm58U6ZcX-1" target="_blank" rel="noopener">Figma ↗</a>
+            <a class="btn btn--ghost" href="https://github.com/dariasadikova/KitYourBrand" target="_blank" rel="noopener">GitHub ↗</a>
+          </div>
+        </div>
+
+        <aside class="summary">
+          <dl class="summary__list">
+            <div><dt>Роль</dt><dd>Продуктовый&nbsp;/ UX/UI&nbsp;дизайнер&nbsp;· Разработчик</dd></div>
+            <div><dt>Формат</dt><dd>Дипломный проект</dd></div>
+            <div><dt>Год</dt><dd>2026</dd></div>
+            <div><dt>Инструменты</dt><dd>Figma&nbsp;· React&nbsp;· TypeScript&nbsp;· FastAPI&nbsp;· Python&nbsp;· AI&nbsp;APIs&nbsp;· Figma&nbsp;Plugin&nbsp;API</dd></div>
+          </dl>
+        </aside>
+      </div>
+
+      <figure class="hero__cover">
+        <img src="images/case-1.jpg" alt="Главный экран KYBBY">
+      </figure>
+    </div>
+
+    <!-- ===== О ПРОЕКТЕ: ЗАДАЧА / РЕЗУЛЬТАТ ===== -->
+    <section class="sec--grey" id="task" data-nav="task">
+      <div class="container">
+        <div class="label"><span class="label__num">1</span><span class="label__text">О&nbsp;проекте</span></div>
+        <h2 class="sec-title">Задача и&nbsp;результат</h2>
+        <div class="duo">
+          <div>
+            <h3>Задача</h3>
+            <p>Объединить разрозненный процесс работы с&nbsp;AI-графикой в&nbsp;одном продукте и&nbsp;сократить количество ручных действий: переключение между сервисами, повторное описание стиля, сохранение результатов, их сортировку и&nbsp;перенос&nbsp;в&nbsp;Figma.</p>
+          </div>
+          <div>
+            <h3>Результат</h3>
+            <p>В&nbsp;результате получилось работающее клиент-серверное приложение с&nbsp;управлением проектами, несколькими AI-провайдерами, историей генераций, просмотром бренд-комплекта на&nbsp;мокапах и&nbsp;отдельным Figma-плагином для&nbsp;импорта&nbsp;результатов.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 1. ИССЛЕДОВАНИЕ ===== -->
+    <section id="research" data-nav="research">
+      <div class="container">
+        <div class="label"><span class="label__num">2</span><span class="label__text">Исследование</span></div>
+        <h2 class="sec-title">Исследование</h2>
+        <div class="lead prose">
+          <p>Перед проектированием я&nbsp;изучила процесс создания бренд-комплекта с&nbsp;помощью AI-инструментов и&nbsp;существующие решения на&nbsp;рынке. Мне было важно понять, какие части процесса уже автоматизированы, а&nbsp;где пользователю всё ещё приходится вручную связывать несколько инструментов&nbsp;между&nbsp;собой.</p>
+          <p>На&nbsp;основе анализа сформулировала несколько гипотез, которые проверяла через исследование предметной области, существующего процесса и&nbsp;конкурентных&nbsp;решений.</p>
+        </div>
+
+        <div class="hyps">
+          <article class="hyp">
+            <p class="hyp__num">Гипотеза 01</p>
+            <h4>Работа с&nbsp;несколькими AI-сервисами делает процесс фрагментированным.</h4>
+            <div class="hyp__text prose">
+              <p>При&nbsp;создании разных типов ассетов пользователь вынужден переходить между сервисами, отдельно задавать промпты, сохранять файлы и&nbsp;сравнивать результаты.</p>
+            </div>
+            <div class="hyp__solution"><div><span>Решение</span>Объединить эти действия внутри одного проекта KYBBY.</div></div>
+          </article>
+
+          <article class="hyp">
+            <p class="hyp__num">Гипотеза 02</p>
+            <h4>При&nbsp;генерации разных типов материалов сложно сохранять единое визуальное направление.</h4>
+            <div class="hyp__text prose">
+              <p>Разные генерации могут отличаться по&nbsp;палитре, детализации и&nbsp;общей стилистике, особенно если параметры приходится заново задавать в&nbsp;разных инструментах.</p>
+            </div>
+            <div class="hyp__solution"><div><span>Решение</span>Хранить описание бренда, палитру, референсы и&nbsp;настройки внутри проекта и&nbsp;использовать их как&nbsp;общий контекст для&nbsp;дальнейшей генерации.</div></div>
+          </article>
+
+          <article class="hyp">
+            <p class="hyp__num">Гипотеза 03</p>
+            <h4>Результатами генерации сложно управлять после их получения.</h4>
+            <div class="hyp__text prose">
+              <p>При&nbsp;работе с&nbsp;отдельными AI-сервисами результаты оказываются распределены между разными инструментами и&nbsp;локальными файлами, а&nbsp;параметры предыдущих запусков трудно&nbsp;восстановить.</p>
+            </div>
+            <div class="hyp__solution"><div><span>Решение</span>Добавить централизованное хранение ассетов и&nbsp;историю генераций со&nbsp;статусами, ошибками и&nbsp;данными о&nbsp;запусках. Эта проблема и&nbsp;необходимость формализации истории генераций отдельно зафиксированы в&nbsp;анализе предметной области.</div></div>
+          </article>
+
+          <article class="hyp">
+            <p class="hyp__num">Гипотеза 04</p>
+            <h4>Перенос материалов в&nbsp;Figma создаёт лишний ручной этап.</h4>
+            <div class="hyp__text prose">
+              <p>Даже после успешной генерации ассеты приходится скачивать, сортировать и&nbsp;размещать в&nbsp;рабочем документе самостоятельно.</p>
+            </div>
+            <div class="hyp__solution"><div><span>Решение</span>Разработать Figma-плагин, который получает данные проекта и&nbsp;импортирует бренд-комплект в&nbsp;документ автоматически.</div></div>
+          </article>
+        </div>
+
+        <div class="grid sub">
+          <h3 class="sub__head">Целевая аудитория</h3>
+          <div class="sub__body prose">
+            <p>Основные пользователи KYBBY&nbsp;— дизайнеры, фрилансеры, небольшие студии и&nbsp;продуктовые команды, которым нужно быстро сформировать визуальную основу цифрового продукта и&nbsp;продолжить работу с&nbsp;ней&nbsp;в&nbsp;привычной&nbsp;среде.</p>
+          </div>
+        </div>
+
+        <div class="grid sub">
+          <h3 class="sub__head">Конкурентный анализ</h3>
+          <div class="sub__body prose">
+            <p>Я&nbsp;изучила Looka, sologo.ai, BrandKiit и&nbsp;отдельные AI-инструменты. Готовые brand-kit сервисы позволяют быстро получить базовую айдентику, но&nbsp;ограничивают гибкость; отдельные AI-инструменты дают больше возможностей генерации, но&nbsp;оставляют пользователю задачу самостоятельно организовывать весь&nbsp;процесс.</p>
+            <p>Главной возможностью для&nbsp;KYBBY стало объединение всех этапов&nbsp;в&nbsp;одном&nbsp;сценарии:</p>
+            <ol class="steps">
+              <li><span class="steps__num">01</span><span class="steps__label">профиль бренда</span></li>
+              <li><span class="steps__num">02</span><span class="steps__label">генерации</span></li>
+              <li><span class="steps__num">03</span><span class="steps__label">хранение результатов</span></li>
+              <li><span class="steps__num">04</span><span class="steps__label">просмотр</span></li>
+              <li><span class="steps__num">05</span><span class="steps__label">перенос в&nbsp;Figma</span></li>
+            </ol>
+            <p><a class="text-link" href="https://www.figma.com/design/0cdw89dPZyMqnb1P5KsQLv/KYBBY?node-id=0-1&amp;t=A44T61yZm58U6ZcX-1" target="_blank" rel="noopener">Подробнее об&nbsp;исследовании ЦА и&nbsp;конкурентов в&nbsp;Figma ↗</a></p>
+          </div>
+        </div>
+
+        <div class="grid sub">
+          <h3 class="sub__head">Выводы исследования</h3>
+          <div class="sub__body prose">
+            <p>Исследование показало, что&nbsp;проблема заключается не&nbsp;столько в&nbsp;отсутствии инструментов генерации, сколько в&nbsp;разрывах между ними. Отдельный логотип или&nbsp;иллюстрацию получить несложно&nbsp;— трудности появляются, когда нужно создать несколько типов ассетов, сохранить единый контекст бренда, вернуться к&nbsp;прошлым результатам и&nbsp;затем встроить всё это&nbsp;в&nbsp;рабочий&nbsp;процесс.</p>
+            <p class="quote">Поэтому основной идеей KYBBY стал не&nbsp;ещё один генератор изображений, а&nbsp;единое пространство для&nbsp;работы&nbsp;с бренд-комплектом.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 2. AS-IS → TO-BE ===== -->
+    <section class="sec--grey" id="process" data-nav="process">
+      <div class="container">
+        <div class="label"><span class="label__num">3</span><span class="label__text">AS-IS → TO-BE</span></div>
+        <h2 class="sec-title">Как&nbsp;изменился процесс</h2>
+
+        <div class="grid sub" style="margin-top:60px">
+          <div class="sub__head">
+            <span class="compare__tag">AS-IS</span>
+            <h3>Как&nbsp;процесс выглядел до&nbsp;KYBBY</h3>
+          </div>
+          <div class="sub__body prose">
+            <p>Пользователь самостоятельно формирует требования к&nbsp;стилю, готовит отдельные запросы для&nbsp;разных типов графики, запускает генерации в&nbsp;нескольких сервисах, скачивает результаты, сравнивает их, проверяет согласованность и&nbsp;вручную переносит подходящие материалы&nbsp;в&nbsp;Figma.</p>
+          </div>
+          <figure class="scheme">
+            <div class="scheme__scroll">
+              <img src="images/kybby/as-is.jpg" alt="BPMN-схема процесса AS-IS: пользователь поочерёдно работает с отдельными AI-сервисами для логотипов, иконок и паттернов, затем вручную сравнивает результаты и переносит их в Figma" width="3029" height="742" loading="lazy">
+            </div>
+            <figcaption class="scheme__meta">
+              <span>BPMN-схема AS-IS<span class="scheme__hint"> · листайте вбок →</span></span>
+              <a class="text-link" href="images/kybby/as-is.jpg" target="_blank" rel="noopener">Открыть в&nbsp;полном размере ↗</a>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="grid sub">
+          <div class="sub__head">
+            <span class="compare__tag compare__tag--to">TO-BE</span>
+            <h3>Как&nbsp;я&nbsp;предложила изменить процесс</h3>
+          </div>
+          <div class="sub__body prose">
+            <p>В&nbsp;KYBBY пользователь создаёт один проект, задаёт параметры бренда, палитру и&nbsp;референсы, выбирает нужные типы ассетов и&nbsp;AI-провайдеров, после чего запускает генерацию. Результаты, статусы и&nbsp;история сохраняются внутри проекта, а&nbsp;готовый комплект можно скачать или&nbsp;перенести в&nbsp;Figma&nbsp;через&nbsp;плагин.</p>
+          </div>
+          <figure class="scheme">
+            <div class="scheme__scroll">
+              <img src="images/kybby/to-be.jpg" alt="BPMN-схема процесса TO-BE: пользователь создаёт проект в KYBBY, веб-приложение передаёт запрос AI-провайдерам, сохраняет результаты, а Figma-плагин импортирует бренд-комплект" width="3048" height="737" loading="lazy">
+            </div>
+            <figcaption class="scheme__meta">
+              <span>BPMN-схема TO-BE<span class="scheme__hint"> · листайте вбок →</span></span>
+              <a class="text-link" href="images/kybby/to-be.jpg" target="_blank" rel="noopener">Открыть в&nbsp;полном размере ↗</a>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 3. ТРЕБОВАНИЯ И СТРУКТУРА ===== -->
+    <section id="design" data-nav="design">
+      <div class="container">
+        <div class="label"><span class="label__num">4</span><span class="label__text">Проектирование</span></div>
+        <h2 class="sec-title">ТЕХНИЧЕСКОЕ ЗАДАНИЕ</h2>
+        <div class="lead prose">
+          <p>На&nbsp;основе исследования я&nbsp;сформировала техническое задание: зафиксировала задачу продукта, целевую аудиторию, конкурентное поле, ключевые функции и&nbsp;технические&nbsp;требования.</p>
+        </div>
+        <figure class="fig">
+          <dl class="spec">
+            <div class="spec__row">
+              <dt>
+                <p class="spec__title">Базовая информация о&nbsp;проекте</p>
+                <ul class="spec__q"><li>Как&nbsp;называется проект?</li><li>Что&nbsp;это&nbsp;за&nbsp;продукт?</li><li>Что&nbsp;нужно разработать?</li><li>Какую проблему он решает?</li></ul>
+              </dt>
+              <dd>
+                <p>KYBBY (Kit Your Brand By Yourself)&nbsp;— веб-приложение для&nbsp;создания первичного бренд-комплекта с&nbsp;помощью нейросетевых моделей. Пользователь задаёт описание бренда, параметры визуального стиля, палитру и&nbsp;референсы, после чего может генерировать логотипы, иконки, паттерны&nbsp;и иллюстрации.</p>
+                <p>Нужно разработать: клиент-серверное веб-приложение и&nbsp;Figma-плагин для&nbsp;переноса результатов.</p>
+                <p>Проблема: существующий процесс фрагментирован&nbsp;— пользователь работает с&nbsp;несколькими AI-сервисами, вручную сохраняет и&nbsp;сортирует результаты, контролирует единый стиль и&nbsp;переносит материалы&nbsp;в&nbsp;Figma.</p>
+              </dd>
+            </div>
+            <div class="spec__row">
+              <dt>
+                <p class="spec__title">Задача</p>
+                <ul class="spec__q"><li>В&nbsp;чём основная задача продукта?</li><li>Какие ключевые возможности нужны?</li><li>Чем продукт должен отличаться от&nbsp;аналогов?</li><li>Какую ценность должен давать пользователю?</li></ul>
+              </dt>
+              <dd>
+                <p>Основная задача&nbsp;— объединить процесс создания бренд-комплекта в&nbsp;одном продукте: от&nbsp;настройки бренда и&nbsp;генерации ассетов до&nbsp;хранения результатов и&nbsp;их использования&nbsp;в Figma.</p>
+                <p>В&nbsp;продукте должны быть управление проектами, настройка параметров бренда и&nbsp;палитры, загрузка референсов, выбор AI-провайдеров, генерация четырёх типов ассетов, история генераций, просмотр результатов на&nbsp;мокапах&nbsp;и Figma-интеграция.</p>
+                <p>Ключевое отличие от&nbsp;рассмотренных аналогов&nbsp;— ориентация на&nbsp;полный цикл работы, а&nbsp;не&nbsp;только на&nbsp;генерацию отдельных изображений или&nbsp;готового шаблонного бренд-кита.</p>
+              </dd>
+            </div>
+            <div class="spec__row">
+              <dt>
+                <p class="spec__title">Целевая аудитория</p>
+                <ul class="spec__q"><li>Кто будет пользоваться продуктом?</li><li>В&nbsp;каких ситуациях он им нужен?</li></ul>
+              </dt>
+              <dd>
+                <p>Основная аудитория&nbsp;— дизайнеры, фрилансеры, небольшие студии и&nbsp;продуктовые команды, которым нужно быстро сформировать визуальную основу цифрового продукта и&nbsp;продолжить работу с&nbsp;ней&nbsp;в&nbsp;Figma.</p>
+                <p>Также продукт может быть полезен frontend-разработчикам, которые получают подготовленные визуальные материалы для&nbsp;дальнейшего внедрения.</p>
+              </dd>
+            </div>
+            <div class="spec__row">
+              <dt>
+                <p class="spec__title">Конкуренты</p>
+                <ul class="spec__q"><li>Какие решения уже существуют?</li><li>Какие задачи они закрывают?</li><li>Чего в&nbsp;них не&nbsp;хватает для&nbsp;нашего сценария?</li></ul>
+              </dt>
+              <dd>
+                <p>В&nbsp;рамках анализа рассмотрены Looka, sologo.ai, BrandKiit, а&nbsp;также отдельные AI-инструменты генерации графики. Brand-kit сервисы позволяют быстро получить базовую айдентику, но&nbsp;дают ограниченную гибкость и&nbsp;не&nbsp;закрывают весь дальнейший workflow. Отдельные AI-сервисы дают больше свободы генерации, но&nbsp;требуют самостоятельно управлять промптами, файлами, историей и&nbsp;переносом материалов.</p>
+                <p>Для&nbsp;KYBBY важно объединить профиль стиля → генерацию → хранение → просмотр → Figma в&nbsp;одном&nbsp;процессе.</p>
+              </dd>
+            </div>
+            <div class="spec__row">
+              <dt>
+                <p class="spec__title">Как&nbsp;зарабатывает проект?</p>
+                <ul class="spec__q"><li>Есть ли монетизация сейчас?</li><li>Какая модель возможна в&nbsp;дальнейшем?</li></ul>
+              </dt>
+              <dd>
+                <p>В&nbsp;текущей дипломной версии монетизация не&nbsp;реализована: пользователь самостоятельно подключает API-ключи внешних AI-провайдеров.</p>
+                <p>В&nbsp;дальнейшем предусмотрена возможность перейти к&nbsp;тарифной модели: пользователь выбирает тариф и&nbsp;получает лимит генераций или&nbsp;внутренних кредитов, а&nbsp;обращения к&nbsp;AI-провайдерам выполняются через сервер&nbsp;KYBBY.</p>
+              </dd>
+            </div>
+            <div class="spec__row">
+              <dt>
+                <p class="spec__title">Технические требования</p>
+                <ul class="spec__q"><li>В&nbsp;каком формате реализуется продукт?</li><li>Какие технологии и&nbsp;интеграции нужны?</li><li>Какие ограничения и&nbsp;требования нужно учитывать?</li></ul>
+              </dt>
+              <dd>
+                <dl class="spec__tech">
+                  <dt>Формат</dt><dd>веб-приложение + отдельный Figma-плагин</dd>
+                  <dt>Frontend</dt><dd>React, TypeScript, Vite</dd>
+                  <dt>Backend</dt><dd>Python, FastAPI</dd>
+                  <dt>Данные</dt><dd>SQLite, SQLAlchemy, Alembic</dd>
+                  <dt>AI</dt><dd>Recraft API, OpenRouter API, Yandex Cloud AI Studio</dd>
+                  <dt>Интеграция</dt><dd>Figma Plugin API</dd>
+                  <dt>Развёртывание</dt><dd>Docker / Amvera</dd>
+                </dl>
+                <p>Необходимо учитывать обработку долгих AI-запросов и&nbsp;ошибок внешних сервисов, защиту пользовательских данных и&nbsp;API-ключей, хранение истории и&nbsp;параметров проекта, возможность подключения новых&nbsp;AI-провайдеров.</p>
+              </dd>
+            </div>
+          </dl>
+        </figure>
+
+        <div class="grid sub">
+          <h3 class="sub__head">Структура приложения</h3>
+          <div class="sub__body prose">
+            <p>На&nbsp;основе требований спроектировала структуру интерфейса и&nbsp;основные сценарии взаимодействия пользователя&nbsp;с&nbsp;KYBBY.</p>
+          </div>
+          <!-- Схема структуры: положите файл в images/kybby/structure.png -->
+          <figure class="scheme">
+            <div class="scheme__scroll">
+              <img src="images/kybby/structure.png" alt="Структурная схема интерфейса KYBBY: публичная часть (главная, регистрация, авторизация, восстановление пароля, демо-режим) и рабочая область (мои проекты, редактор, генерация, результаты, история генераций, Figma-интеграция, профиль, импорт и экспорт ZIP)" width="2400" height="1450" loading="lazy">
+            </div>
+            <figcaption class="scheme__meta">
+              <span class="scheme__hint"> · листайте вбок →</span>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="grid sub">
+          <h3 class="sub__head">Пользовательские сценарии</h3>
+          <div class="sub__body prose">
+            <p>Основной сценарий строится вокруг проекта. Пользователь создаёт его, задаёт описание бренда, палитру и&nbsp;референсы, выбирает типы ассетов и&nbsp;провайдеров, запускает генерацию, оценивает результат и&nbsp;затем скачивает материалы или&nbsp;переносит&nbsp;их&nbsp;в&nbsp;Figma.</p>
+            <p>Дополнительно предусмотрела демо-режим без&nbsp;регистрации, работу с&nbsp;предыдущими генерациями, обработку ошибок, импорт и&nbsp;экспорт проектов и&nbsp;управление&nbsp;профилем.</p>
+          </div>
+          <!-- Основной сценарий: images/kybby/user-flow.png -->
+          <figure class="scheme">
+            <div class="scheme__scroll">
+              <img src="images/kybby/user-flow.png" alt="User flow «Создание бренд-комплекта»: вход, мои проекты, создание проекта, описание бренда, палитра, референсы, типы ассетов, AI-провайдеры, генерация и просмотр результатов; дополнительные ветки — импорт ZIP, скачивание, перенос в Figma, мокапы; экстренные — ошибки ключа и провайдера, неподходящие параметры" width="4278" height="1260" loading="lazy">
+            </div>
+            <figcaption class="scheme__meta">
+              <span>Основной сценарий<span class="scheme__hint"> · листайте вбок →</span></span>
+              <span class="scheme__links">
+                <a class="text-link" href="https://www.figma.com/design/0cdw89dPZyMqnb1P5KsQLv/KYBBY?node-id=0-1&amp;t=A44T61yZm58U6ZcX-1" target="_blank" rel="noopener">Остальные сценарии в&nbsp;Figma ↗</a>
+              </span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 4. ОТ СТРУКТУРЫ К ИНТЕРФЕЙСУ (входит в «Проектирование») ===== -->
+    <section class="sec--grey" id="wireframes" data-nav="design">
+      <div class="container">
+        <div class="label"><span class="label__num">5</span><span class="label__text">Вайрфреймы</span></div>
+        <h2 class="sec-title">От&nbsp;структуры к&nbsp;интерфейсу</h2>
+        <div class="lead prose">
+          <p>После определения сценариев перешла к&nbsp;проектированию экранов приложения. Основной рабочий путь выстроен&nbsp;последовательно:</p>
+        </div>
+        <ol class="steps">
+          <li><span class="steps__num">01</span><span class="steps__label">проекты</span></li>
+          <li><span class="steps__num">02</span><span class="steps__label">настройка бренда</span></li>
+          <li><span class="steps__num">03</span><span class="steps__label">генерация</span></li>
+          <li><span class="steps__num">04</span><span class="steps__label">результат</span></li>
+          <li><span class="steps__num">05</span><span class="steps__label">использование материалов</span></li>
+        </ol>
+        <div class="lead prose" style="margin-top:40px">
+          <p>На&nbsp;этапе вайрфреймов проверяла последовательность шагов, состав форм и&nbsp;расположение ключевых действий до&nbsp;перехода к&nbsp;визуальному&nbsp;дизайну.</p>
+        </div>
+        <!-- Вайрфреймы: images/kybby/wf-*.png. Все картинки одной ширины, --r = ширина / высота картинки -->
+        <div class="wf">
+          <figure class="wf__item" style="--r: 1.318">
+            <a href="images/kybby/wf-landing.png" target="_blank" rel="noopener">
+              <img src="images/kybby/wf-landing.png" alt="Вайрфрейм главной страницы KYBBY: заголовок, слоган и карточки возможностей платформы" width="2530" height="1920" loading="lazy">
+            </a>
+            <figcaption>Главная страница</figcaption>
+          </figure>
+          <figure class="wf__item" style="--r: 1.635">
+            <a href="images/kybby/wf-projects.png" target="_blank" rel="noopener">
+              <img src="images/kybby/wf-projects.png" alt="Вайрфрейм раздела «Мои проекты» в пустом состоянии с кнопками создания и импорта проекта" width="2530" height="1547" loading="lazy">
+            </a>
+            <figcaption>Мои проекты · пустое состояние</figcaption>
+          </figure>
+          <figure class="wf__item" style="--r: 0.858">
+            <a href="images/kybby/wf-plugin.png" target="_blank" rel="noopener">
+              <img src="images/kybby/wf-plugin.png" alt="Вайрфрейм страницы Figma-плагина с инструкциями по установке и импорту" width="2530" height="2949" loading="lazy">
+            </a>
+            <figcaption>Figma-плагин</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 5. ВИЗУАЛЬНАЯ СИСТЕМА И МАКЕТЫ ===== -->
+    <section class="sec--dark" id="interface" data-nav="interface">
+      <div class="container">
+        <div class="label"><span class="label__num">6</span><span class="label__text">Интерфейс</span></div>
+        <h2 class="sec-title">Визуальная система</h2>
+        <div class="lead prose">
+          <p>Интерфейс KYBBY построила на&nbsp;тёмной основе с&nbsp;голубым акцентным цветом. Поскольку пользователь работает с&nbsp;визуальными материалами разных стилей и&nbsp;цветов, фон должен оставаться нейтральным и&nbsp;не&nbsp;конкурировать с&nbsp;генерируемым&nbsp;контентом.</p>
+          <p>В&nbsp;качестве основного шрифта использовала Roboto, а&nbsp;Doto&nbsp;—&nbsp;для&nbsp;логотипа.</p>
+        </div>
+        <!-- Палитра и шрифты: images/kybby/palette.png -->
+        <figure class="fig">
+          <img src="images/kybby/palette.png" alt="Палитра KYBBY: белый #FFFFFF, чёрный #010101, голубой акцент #00AEFF; шрифты Doto для логотипа и Roboto для текста" width="2772" height="1045" loading="lazy">
+        </figure>
+        <div class="lead prose" style="margin-top:32px">
+          <p>Doto использован в&nbsp;логотипе как&nbsp;визуальная метафора KYBBY: отдельные элементы шрифта складываются в&nbsp;цельную форму, как&nbsp;ассеты&nbsp;— в&nbsp;единый бренд-комплект. Для&nbsp;всего остального текста выбран нейтральный и&nbsp;хорошо&nbsp;читаемый&nbsp;Roboto.</p>
+        </div>
+
+        <div class="grid sub">
+          <h3 class="sub__head">Финальные макеты</h3>
+          <div class="sub__body">
+            <div class="stats">
+              <div><p class="stat__num">26</p><p class="stat__cap">экранных форм</p></div>
+            </div>
+            <p style="margin-top:24px">Для&nbsp;продукта подготовила 26 экранных форм: публичные страницы, авторизацию, демо-режим, список проектов, редактор, процесс генерации, результаты, историю, Figma-интеграцию и&nbsp;профиль&nbsp;пользователя.</p>
+          </div>
+        </div>
+
+        <!-- Финальные макеты: images/kybby/screens.jpg (для страницы) и screens-full.jpg (полный размер) -->
+        <figure class="fig screens-collage">
+          <a href="images/kybby/screens-full.jpg" target="_blank" rel="noopener">
+            <img src="images/kybby/screens.jpg" alt="Финальные макеты KYBBY: главная страница, регистрация, авторизация, «Мои проекты», редактор проекта, результаты генерации, статистика генераций, страница Figma-плагина и профиль пользователя" width="2400" height="2070" loading="lazy">
+          </a>
+          <figcaption class="scheme__meta">
+            <span>Примеры основных экранов KYBBY</span>
+            <a class="text-link" href="https://www.figma.com/design/0cdw89dPZyMqnb1P5KsQLv/KYBBY?node-id=0-1&amp;t=A44T61yZm58U6ZcX-1" target="_blank" rel="noopener">Остальные макеты в&nbsp;Figma ↗</a>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===== 6. ТЕСТИРОВАНИЕ ===== -->
+    <section id="testing" data-nav="testing">
+      <div class="container">
+        <div class="label"><span class="label__num">7</span><span class="label__text">Тестирование</span></div>
+        <h2 class="sec-title">Тестирование</h2>
+
+        <div class="grid sub" style="margin-top:60px">
+          <h3 class="sub__head">Юзабилити-тестирование</h3>
+          <div class="sub__body">
+            <div class="stats">
+              <div><p class="stat__num">5</p><p class="stat__cap">респондентов</p></div>
+              <div><p class="stat__num">3</p><p class="stat__cap">проблемы выявлено<br>и&nbsp;решено</p></div>
+            </div>
+            <p style="margin-top:24px">Чтобы проверить сервис глазами пользователей, провела опрос среди студентов своего потока: они попробовали KYBBY и&nbsp;поделились впечатлениями. Ответы выявили три проблемы&nbsp;— все они решены в&nbsp;текущей&nbsp;версии&nbsp;продукта.</p>
+          </div>
+
+          <div class="sub__full test-split">
+            <!-- Скриншот опроса: images/kybby/survey.png -->
+            <figure class="survey">
+              <img src="images/kybby/survey.png" alt="Фрагмент ответов опроса: респонденты хотят загружать несколько референсов, делиться проектом с коллегами и попробовать сервис без регистрации" width="787" height="881" loading="lazy">
+              <figcaption>Фрагмент ответов из&nbsp;опроса</figcaption>
+            </figure>
+            <div class="insights">
+              <article class="insight">
+              <div class="insight__head">
+                <div><span>Проблема 01</span><p>Одного референса недостаточно: чтобы точнее передать стиль, пользователи собирают несколько изображений.</p></div>
+                <div class="insight__arrow" aria-hidden="true">→</div>
+                <div><span>Что&nbsp;изменила</span><p>Добавила возможность прикреплять к&nbsp;проекту несколько референсов.</p></div>
+              </div>
+            </article>
+              <article class="insight">
+              <div class="insight__head">
+                <div><span>Проблема 02</span><p>Нельзя познакомиться с&nbsp;возможностями сервиса&nbsp;до регистрации.</p></div>
+                <div class="insight__arrow" aria-hidden="true">→</div>
+                <div><span>Что&nbsp;изменила</span><p>Добавила демо-режим: пробная генерация без&nbsp;аккаунта с&nbsp;упрощённой формой бренда и&nbsp;предложением зарегистрироваться после&nbsp;результата.</p></div>
+              </div>
+            </article>
+              <article class="insight">
+              <div class="insight__head">
+                <div><span>Проблема 03</span><p>Нельзя поделиться проектом с&nbsp;коллегой, чтобы он открыл форму редактора и&nbsp;результаты у&nbsp;себя и&nbsp;продолжил&nbsp;работу.</p></div>
+                <div class="insight__arrow" aria-hidden="true">→</div>
+                <div><span>Что&nbsp;изменила</span><p>Добавила экспорт и&nbsp;импорт проекта: проект сохраняется в&nbsp;ZIP-архив, и&nbsp;коллега открывает его в&nbsp;своём&nbsp;аккаунте.</p></div>
+              </div>
+            </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 7. ИТОГ ===== -->
+    <section class="sec--tint outro" id="outro" data-nav="outro">
+      <div class="container">
+        <div class="label"><span class="label__num">8</span><span class="label__text">Итог</span></div>
+        <h2 class="sec-title" style="color:var(--accent)">Итог</h2>
+        <div class="lead prose">
+          <p>В&nbsp;KYBBY я&nbsp;прошла полный путь от&nbsp;исследования проблемы до&nbsp;работающего продукта. В&nbsp;результате разрозненный процесс создания бренд-материалов удалось собрать в&nbsp;одном интерфейсе: параметры бренда, несколько AI-провайдеров, генерации, история результатов, просмотр на&nbsp;мокапах и&nbsp;перенос материалов&nbsp;в&nbsp;Figma.</p>
+          <p>Для&nbsp;меня этот проект стал возможностью поработать не&nbsp;только с&nbsp;визуальной частью интерфейса, но&nbsp;и&nbsp;с&nbsp;логикой сложного продукта, большим количеством состояний, внешними интеграциями и&nbsp;связью дизайна с&nbsp;технической&nbsp;реализацией.</p>
+        </div>
+        <div class="btns">
+          <a class="btn btn--primary" href="https://kybby-app.amvera.io" target="_blank" rel="noopener">Открыть KYBBY ↗</a>
+          <a class="btn btn--ghost" href="https://www.figma.com/design/0cdw89dPZyMqnb1P5KsQLv/KYBBY?node-id=0-1&amp;t=A44T61yZm58U6ZcX-1" target="_blank" rel="noopener">Figma ↗</a>
+          <a class="btn btn--ghost" href="https://github.com/dariasadikova/KitYourBrand" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+
+        <footer class="footer">
+          <p>© 2026 Дарья Садикова&nbsp;—&nbsp;UX/UI&nbsp;дизайнер</p>
+          <a href="index.html#cases">← Все проекты</a>
+        </footer>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    (function () {
+      var header = document.querySelector('.case-header');
+      var nav = document.querySelector('.case-nav');
+      var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+      var sections = Array.prototype.slice.call(document.querySelectorAll('[data-nav]'));
+      var current = null;
+
+      function update() {
+        var line = header.offsetHeight + window.innerHeight * 0.3;
+        var active = null;
+        sections.forEach(function (s) {
+          if (s.getBoundingClientRect().top <= line) active = s.dataset.nav;
+        });
+        var atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+        if (atBottom) active = sections[sections.length - 1].dataset.nav;
+        if (active === current) return;
+        current = active;
+        links.forEach(function (a) {
+          var on = a.getAttribute('href') === '#' + active;
+          if (on) {
+            a.setAttribute('aria-current', 'true');
+            // на мобилке прокручиваем меню, чтобы активный пункт был виден
+            if (nav.scrollWidth > nav.clientWidth) {
+              nav.scrollTo({ left: a.offsetLeft - nav.offsetLeft - 16, behavior: 'smooth' });
+            }
+          } else {
+            a.removeAttribute('aria-current');
+          }
+        });
+      }
+
+      var ticking = false;
+      window.addEventListener('scroll', function () {
+        if (!ticking) { ticking = true; requestAnimationFrame(function () { update(); ticking = false; }); }
+      }, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    })();
+  </script>
+</body>
+</html>

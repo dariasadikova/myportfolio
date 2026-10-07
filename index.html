@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Дарья Садикова — UX/UI-дизайнер</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Manrope:wght@800&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- Локальные шрифты (папка fonts/ рядом с index.html) ---------- */
+    @font-face { font-family: "Manrope"; src: local("Manrope ExtraBold"), local("Manrope-ExtraBold"), url("fonts/Manrope-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; font-display: swap; }
+    @font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono Regular"), local("JetBrainsMono-Regular"), url("fonts/JetBrainsMono-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono Medium"), local("JetBrainsMono-Medium"), url("fonts/JetBrainsMono-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+    @font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono Bold"), local("JetBrainsMono-Bold"), url("fonts/JetBrainsMono-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: "JetBrains Mono"; src: local("JetBrains Mono ExtraBold"), local("JetBrainsMono-ExtraBold"), url("fonts/JetBrainsMono-ExtraBold.woff2") format("woff2"); font-weight: 800; font-style: normal; font-display: swap; }
+
+    /* ---------- Токены из Figma ---------- */
+    :root {
+      --bg: #efefef;
+      --ink: #333333;
+      --muted: rgba(51, 51, 51, 0.6);
+      --line: rgba(51, 51, 51, 0.4);
+      --accent: #e45f21;
+      --accent-tint: rgba(228, 95, 33, 0.06);
+      --about-bg: #cdcdcd;
+      --dark-bg: #333333;
+      --dark-line: #545454;
+      --light: #efefef;
+      --contacts-bg: rgba(228, 95, 33, 0.3);
+
+      --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      --display: "Manrope", "Helvetica Neue", Arial, sans-serif;
+      --lh-mono: 1.32;     /* line-height: normal у JetBrains Mono */
+      --lh-display: 1.366; /* line-height: normal у Manrope */
+
+      --margin: 120px;     /* Margin сетки Figma (Stretch) */
+      --gutter: 40px;      /* Gutter сетки Figma */
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 18px;
+      line-height: var(--lh-mono);
+    }
+    p, h1, h2, h3, ul { margin: 0; padding: 0; }
+    ul { list-style: none; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Ровный край абзацев: браузер сам подбирает переносы, без «обрубков» в последней строке */
+    p, li, dd, figcaption { text-wrap: pretty; }
+    h1, h2, h3, h4 { text-wrap: balance; }
+    img { display: block; max-width: 100%; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+    /* Сетка Stretch: поля по 120px с каждой стороны, контент тянется */
+    .container { width: auto; margin-inline: var(--margin); }
+    @media (max-width: 1240px) { :root { --margin: 64px; } }
+    @media (max-width: 560px)  { :root { --margin: 24px; --gutter: 16px; } }
+
+    /* ---------- Общие элементы ---------- */
+    .label { display: flex; align-items: center; gap: 8px; }
+    .label__num {
+      display: grid; place-items: center;
+      width: 32px; height: 32px;
+      background: var(--accent); color: var(--light);
+      font-weight: 500; font-size: 16px;
+    }
+    .label__text { font-weight: 500; font-size: 14px; color: var(--muted); }
+
+    .section-title {
+      margin-top: 32px;
+      font-family: var(--display); font-weight: 800;
+      font-size: 40px; line-height: var(--lh-display);
+      letter-spacing: -0.02em;
+    }
+
+    .square { display: block; width: 9px; height: 9px; background: var(--accent); flex-shrink: 0; }
+
+    /* ---------- HERO ---------- */
+    /* Фоновое слово растёт вместе с шириной экрана (174px при 1440px),
+       а блюр, блок с именем и высота hero подстраиваются под него */
+    .hero {
+      --word-fs: 12.08vw;
+      --word-top: 108px;
+      --word-h: calc(var(--word-fs) * 1.32);
+      position: relative; overflow: hidden;
+      height: calc(var(--word-top) + var(--word-h) + 276px); /* 614px при 1440 */
+    }
+
+    .hero__word {
+      position: absolute; top: var(--word-top);
+      left: -0.694vw; /* −10px при 1440 */
+      font-weight: 800; font-size: var(--word-fs);
+      line-height: var(--lh-mono);
+      color: rgba(51, 51, 51, 0.7);
+      white-space: nowrap; user-select: none;
+    }
+    .hero__blur {
+      position: absolute; left: 0; right: 0;
+      top: calc(var(--word-top) - 24px); height: calc(var(--word-h) + 24px); /* 84px и 254px при 1440 */
+      background: rgba(239, 239, 239, 0.13);
+      -webkit-backdrop-filter: blur(calc(var(--word-fs) * 0.0862)); /* 15px при 1440 */
+      backdrop-filter: blur(calc(var(--word-fs) * 0.050));          /* 12px при 1440 */
+    }
+    .hero__columns {
+      position: absolute; inset: 0;
+      display: grid; grid-template-columns: repeat(8, 1fr); column-gap: var(--gutter);
+      pointer-events: none;
+    }
+    .hero__columns span { background: var(--accent-tint); }
+
+    .header {
+      position: relative; z-index: 2;
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 40px; font-size: 16px;
+    }
+    .nav { display: flex; gap: 44px; }
+    .contacts-bar { display: flex; align-items: center; gap: 22px; }
+    .contacts-bar__sep { width: 1px; height: 12px; background: var(--line); }
+    .contacts-bar .half-space { font-size: 8px; }
+    .nav a:hover, .contacts-bar a:hover { color: var(--accent); }
+
+    /* Бургер (виден только на мобилке) */
+    .burger {
+      display: none;
+      position: fixed; z-index: 50; top: 20px; right: var(--margin);
+      width: 44px; height: 44px; padding: 0; border: 0; cursor: pointer;
+      background: var(--accent);
+    }
+    .burger span {
+      position: absolute; left: 12px; width: 20px; height: 2px; background: var(--light);
+      transition: transform .25s, top .25s;
+    }
+    .burger span:nth-child(1) { top: 17px; }
+    .burger span:nth-child(2) { top: 25px; }
+    .menu-open .burger span:nth-child(1) { top: 21px; transform: rotate(45deg); }
+    .menu-open .burger span:nth-child(2) { top: 21px; transform: rotate(-45deg); }
+    .burger:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+    .hero__main {
+      position: absolute; z-index: 2;
+      top: calc(var(--word-top) + var(--word-h) + 3px); left: 0; right: 0; /* 341px при 1440 */
+      display: grid; grid-template-columns: repeat(8, 1fr); column-gap: var(--gutter);
+      align-items: start;
+    }
+    .hero__name {
+      grid-column: 1 / 4;
+      font-family: var(--display); font-weight: 800;
+      font-size: 74px; line-height: 82px; letter-spacing: -0.02em;
+      color: var(--accent);
+    }
+    .hero__face { grid-column: 4 / 5; margin-top: 14px; aspect-ratio: 1; width: 100%; position: relative; overflow: hidden; background: #d6d6d6; }
+    .hero__face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; font-size: 0; } /* font-size: 0 прячет alt-текст, если фото не загрузилось */
+    .hero__aside { grid-column: 5 / 9; margin-top: 10px; display: flex; flex-direction: column; gap: 30px; }
+    .hero__lead { font-weight: 500; font-size: 15px; }
+    .hero__buttons { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--gutter); }
+
+    .btn {
+      display: flex; align-items: center; justify-content: center;
+      height: 50px; font-weight: 500; font-size: 18px;
+      transition: background-color .2s, color .2s;
+    }
+    .btn--primary { background: var(--accent); color: var(--light); }
+    .btn--primary:hover { background: #cf5118; }
+    .btn--ghost { border: 2px solid var(--ink); }
+    .btn--ghost:hover { background: var(--ink); color: var(--light); }
+
+    /* ---------- ОБО МНЕ ---------- */
+    .about { background: var(--about-bg); padding: 120px 0; }
+    .about__grid { display: grid; grid-template-columns: 1fr 422px; gap: 40px; }
+    .about__text { margin-top: 28px; max-width: 740px; }
+    .about__text p + p { margin-top: 24px; }
+
+    .tools {
+      display: flex; flex-direction: column;
+      min-height: 477px; padding: 42px 32px;
+      border: 1px solid var(--muted);
+    }
+    .tools__list { margin-top: 35px; display: flex; flex-direction: column; gap: 20px; }
+    .tools__list li { display: flex; align-items: center; gap: 8px; }
+    .tools__ai { margin-top: auto; padding-top: 32px; color: var(--muted); }
+    .tools__ai p + p { margin-top: 5px; font-size: 16px; }
+
+    /* ---------- КЕЙСЫ ---------- */
+    .cases { background: var(--dark-bg); color: var(--light); padding: 120px 0; }
+    .cases .label__text { color: var(--light); }
+    .cases__lead { margin-top: 28px; }
+    .cases__list { margin-top: 60px; }
+
+    .case {
+      display: grid; grid-template-columns: 621px 1fr; gap: 84px;
+      padding: 60px 0; border-top: 1px solid var(--dark-line);
+    }
+    .case:last-child { padding-bottom: 0; }
+    .case__cover {
+      width: 100%; height: auto; align-self: stretch; object-fit: cover; object-position: top;
+      contain: size; /* высоту задаёт текстовый блок (мин. 298px), а не пропорции картинки */
+      border: 1px solid var(--dark-bg); background: #444;
+    }
+    /* Заглушка обложки, пока нет картинки */
+    .case__cover--ph { display: grid; place-items: center; border: 1px dashed rgba(239, 239, 239, 0.3); color: rgba(239, 239, 239, 0.45); font-size: 14px; font-weight: 500;
+      background: repeating-linear-gradient(135deg, transparent 0 14px, rgba(239, 239, 239, .04) 14px 15px), #3a3a3a; }
+    .case__body { display: flex; flex-direction: column; min-width: 0; min-height: 298px; }
+    .case__tag { font-weight: 500; font-size: 14px; color: var(--accent); }
+    .case__title { margin-top: 15px; font-weight: 500; font-size: 18px; }
+    .case__desc { margin-top: 35px; margin-bottom: 24px; font-size: 16px; line-height: 1.5; color: rgba(239, 239, 239, 0.6); /* ширина = ширине колонки, как у кнопки */ }
+    .case__link {
+      margin-top: auto; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 50px; padding: 0 25px;
+      border: 2px solid var(--light);
+      font-weight: 500; font-size: 18px;
+    }
+    .case__link svg { width: 120px; height: 16px; flex-shrink: 0; transition: transform .25s; }
+    .case__link:hover svg { transform: translateX(6px); }
+    /* Заблокированный кейс: карточка полноценная, неактивна только кнопка */
+    .case__link--soon { border-color: rgba(239, 239, 239, 0.3); color: rgba(239, 239, 239, 0.55); cursor: default; user-select: none; }
+    .case__dash { width: 24px; height: 2px; background: currentColor; flex-shrink: 0; }
+
+    /* ---------- ОПЫТ ---------- */
+    .experience { padding: 120px 0; }
+    .timeline {
+      position: relative; margin-top: 60px;
+      padding: 57px 0 58px;
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    }
+    .timeline::before {
+      content: ""; position: absolute; left: 32px; top: 32px; bottom: 32px;
+      width: 1px; background: var(--line);
+    }
+    .job {
+      position: relative;
+      display: grid; grid-template-columns: 357px 1fr;
+      padding-left: 68px; letter-spacing: -0.02em;
+    }
+    .job .square { position: absolute; left: 27px; top: 8px; }
+    .job + .job { margin-top: 29px; padding-top: 20px; }
+    .job + .job::before {
+      content: ""; position: absolute; top: 0; left: 68px;
+      width: min(977px, calc(100% - 68px)); height: 1px; background: var(--line);
+    }
+    .job + .job .square { top: 28px; }
+    .job__place { display: flex; flex-direction: column; gap: 16px; }
+    .job__role { font-weight: 700; }
+    .job__about { color: var(--muted); }
+
+    /* ---------- КОНТАКТЫ ---------- */
+    .contacts { background: var(--contacts-bg); padding: 118px 0 23px; }
+    .contacts__title { color: var(--accent); text-transform: uppercase; letter-spacing: 0; }
+    .contacts__table {
+      margin-top: 60px;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--muted);
+    }
+    .contact { display: flex; flex-direction: column; gap: 16px; padding: 32px; min-height: 146px; }
+    .contact + .contact { border-left: 1px solid var(--line); }
+    .contact__label { font-weight: 500; font-size: 14px; color: var(--muted); }
+    .contact__value { font-weight: 700; font-size: 18px; }
+    .contact__value:hover { color: var(--accent); }
+
+    .footer {
+      margin-top: 78px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-weight: 500; font-size: 14px;
+    }
+    .to-top { display: flex; align-items: center; gap: 12px; }
+    .to-top svg { width: 14px; height: 11px; }
+    .to-top:hover { color: var(--accent); }
+
+    /* ---------- Адаптив ---------- */
+    @media (max-width: 1240px) {
+      .case { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
+      .case__desc { width: auto; max-width: 100%; }
+      .case__cover { height: auto; aspect-ratio: 621 / 298; contain: none; }
+    }
+
+    @media (max-width: 960px) {
+      /* Бургер-меню: шапка превращается в полноэкранную панель */
+      .burger { display: block; }
+      .header {
+        position: fixed; inset: 0; z-index: 40; margin: 0;
+        flex-direction: column; align-items: flex-start; justify-content: space-between;
+        padding: 104px var(--margin) 40px;
+        background: var(--bg);
+        visibility: hidden; opacity: 0; transition: opacity .25s, visibility .25s;
+      }
+      .menu-open .header { visibility: visible; opacity: 1; }
+      .menu-open { overflow: hidden; }
+      .nav { flex-direction: column; gap: 20px; }
+      .nav a {
+        font-family: var(--display); font-weight: 800;
+        font-size: 36px; line-height: 1.1; letter-spacing: -0.02em;
+      }
+      .contacts-bar { flex-direction: column; align-items: flex-start; gap: 12px; font-size: 18px; }
+      .contacts-bar__sep { display: none; }
+
+      /* UX/UI-ДИЗАЙНЕР: ниже, прямо над именем; размытие пропорционально размеру */
+      .hero { --word-fs: 12.08vw; --word-top: 96px; height: auto; padding-bottom: 64px; }
+      .hero__word { top: var(--word-top); left: -0.7vw; font-size: var(--word-fs); }
+      .hero__blur {
+        top: calc(var(--word-top) - var(--word-fs) * 0.14);
+        height: calc(var(--word-fs) * 1.46);
+        -webkit-backdrop-filter: blur(calc(var(--word-fs) * 0.07));
+        backdrop-filter: blur(calc(var(--word-fs) * 0.07));
+      }
+      .hero__main {
+        position: static; margin-top: calc(var(--word-top) + var(--word-fs) * 1.32 + 16px);
+        grid-template-columns: 1fr auto; row-gap: 32px; column-gap: 24px;
+      }
+      .hero__name { grid-column: 1; font-size: clamp(44px, 9vw, 74px); line-height: 1.1; }
+      .hero__face { grid-column: 2; width: 96px; margin-top: 0; }
+      /* Низ фото = базовая линия «САДИКОВА» (align-self: end — запасной вариант для старых браузеров) */
+      .hero__name, .hero__face { align-self: end; align-self: last baseline; }
+      .hero__aside { grid-column: 1 / -1; margin-top: 0; }
+      .hero__buttons { grid-template-columns: 1fr; row-gap: 12px; }
+
+      .about__grid { grid-template-columns: 1fr; gap: 64px; }
+      .tools { min-height: 0; }
+
+      .case { grid-template-columns: 1fr; gap: 32px; padding: 32px 0; }
+      .case__cover { height: auto; aspect-ratio: 621 / 298; align-self: start; contain: none; }
+      .case__body { min-height: 0; }
+      .cases__list { margin-top: 32px; }
+      .case__link { margin-top: 16px; }
+
+      .job, .job + .job { grid-template-columns: 1fr; row-gap: 8px; }
+      .job + .job::before { width: calc(100% - 68px); }
+
+      .contacts__table { grid-template-columns: 1fr; }
+      .contact { min-height: 0; }
+      .contact + .contact { border-left: 0; border-top: 1px solid var(--line); }
+      .footer { flex-direction: column; align-items: flex-start; gap: 16px; }
+    }
+
+    @media (max-width: 560px) {
+      body { font-size: 16px; }
+      .nav { gap: 20px; flex-wrap: wrap; }
+      .about, .cases, .experience { padding: 80px 0; }
+      .contacts { padding-top: 80px; }
+      .section-title { font-size: 32px; }
+      .case__link { font-size: 16px; padding: 0 16px; }
+      .case__link svg { width: 64px; }
+    }
+      .nobr { white-space: nowrap; } /* слово с дефисом не разрывается */
+  </style>
+</head>
+<body id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__word" aria-hidden="true">UX/UI-ДИЗАЙНЕР</div>
+    <div class="hero__blur" aria-hidden="true"></div>
+    <div class="container hero__columns" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <button class="burger" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="menu">
+      <span></span><span></span>
+    </button>
+    <header class="container header" id="menu">
+      <nav class="nav" aria-label="Навигация">
+        <a href="#about">ОБО МНЕ</a>
+        <a href="#skills">НАВЫКИ</a>
+        <a href="#cases">КЕЙСЫ</a>
+        <a href="#experience">ОПЫТ</a>
+      </nav>
+      <div class="contacts-bar">
+        <a href="tel:+79854457303">+7<span class="half-space"> </span>985<span class="half-space"> </span>445-73-03</a>
+        <span class="contacts-bar__sep" aria-hidden="true"></span>
+        <a href="mailto:sadidash@yandex.ru">sadidash@yandex.ru</a>
+        <span class="contacts-bar__sep" aria-hidden="true"></span>
+        <a href="https://t.me/dariostaa" target="_blank" rel="noopener">@dariostaa</a>
+      </div>
+    </header>
+
+    <div class="container hero__main">
+      <h1 class="hero__name">ДАРЬЯ<br>САДИКОВА</h1>
+      <div class="hero__face"><img src="images/face.jpg" alt="Дарья Садикова" width="115" height="115"></div>
+      <div class="hero__aside">
+        <p class="hero__lead">
+          Проектирую цифровые интерфейсы и&nbsp;визуальные концепции.  <br>Благодаря техническому бэкграунду смотрю на&nbsp;продукт <br>не&nbsp;только как&nbsp;дизайнер, но&nbsp;и&nbsp;с&nbsp;точки зрения его&nbsp;реализации.
+        </p>
+        <div class="hero__buttons">
+          <a class="btn btn--primary" href="#cases">посмотреть проекты</a>
+          <a class="btn btn--ghost" href="cv.pdf" download>скачать CV</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ОБО МНЕ -->
+  <section class="about" id="about">
+    <div class="container about__grid">
+      <div>
+        <div class="label"><span class="label__num">1</span><span class="label__text">ОБО МНЕ</span></div>
+        <h2 class="section-title">ПОЗНАКОМИМСЯ</h2>
+        <div class="about__text">
+          <p>Я&nbsp;UX/UI-дизайнер. В&nbsp;основе моей работы&nbsp;— понимание задачи, целей бизнеса и&nbsp;потребностей пользователей. На&nbsp;этой базе я&nbsp;выстраиваю логику продукта и&nbsp;превращаю её в&nbsp;цельное визуальное&nbsp;решение.</p>
+          <p>Я&nbsp;окончила Московский Политех по&nbsp;направлению «Веб-технологии», где четыре года изучала веб-разработку. Благодаря этому понимаю, как&nbsp;дизайн переходит в&nbsp;реализацию: учитываю особенности вёрстки, адаптивность, логику компонентов и&nbsp;технические ограничения ещё на&nbsp;этапе&nbsp;проектирования.</p>
+          <p>В&nbsp;свободное время люблю путешествовать и&nbsp;фотографировать. Часто замечаю детали, мимо которых легко пройти: интересную вывеску, сочетание цветов, фактуру или&nbsp;композицию кадра. Наверное, поэтому профессия дизайнера мне так&nbsp;близка.</p>
+        </div>
+      </div>
+
+      <aside class="tools" id="skills">
+        <div class="label"><span class="label__num">2</span><span class="label__text">ИНСТРУМЕНТЫ</span></div>
+        <ul class="tools__list">
+          <li><span class="square"></span>Figma</li>
+          <li><span class="square"></span>Adobe Photoshop</li>
+          <li><span class="square"></span>Adobe Illustrator</li>
+          <li><span class="square"></span>Tilda</li>
+          <li><span class="square"></span>Miro</li>
+          <li><span class="square"></span>HTML / CSS</li>
+        </ul>
+        <div class="tools__ai">
+          <p>AI-генераторы</p>
+          <p>Recraft AI · Midjourney · Nano Banana</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- КЕЙСЫ -->
+  <section class="cases" id="cases">
+    <div class="container">
+      <div class="label"><span class="label__num">3</span><span class="label__text">КЕЙСЫ</span></div>
+      <h2 class="section-title">ПРОЕКТЫ</h2>
+      <p class="cases__lead">Проекты, в&nbsp;которых я&nbsp;работала над&nbsp;интерфейсами и&nbsp;визуальными системами&nbsp;— от&nbsp;исследования до&nbsp;финального&nbsp;решения.</p>
+
+      <div class="cases__list">
+        <article class="case">
+          <img class="case__cover" src="images/case-1.jpg" alt="KYBBY — главный экран AI-сервиса для создания бренд-комплекта" loading="lazy">
+          <div class="case__body">
+            <p class="case__tag">кейс_01</p>
+            <h3 class="case__title">AI-сервис для&nbsp;создания бренд-комплекта</h3>
+            <p class="case__desc">Спроектировала UX/UI и&nbsp;реализовала AI-сервис для&nbsp;создания бренд-комплекта&nbsp;— от&nbsp;настройки бренда и&nbsp;палитры до&nbsp;генерации графики и&nbsp;переноса материалов&nbsp;в&nbsp;Figma.</p>
+            <a class="case__link" href="kybby.html">подробнее о&nbsp;проекте
+              <svg viewBox="0 0 120 16" fill="none" aria-hidden="true"><path d="M0 8H118M111 1.5L118 8L111 14.5" stroke="#E45F21" stroke-width="2"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="case">
+          <img class="case__cover" src="images/case-2.jpg" alt="Иконки для сайта Музея Москвы: здания, фонарь, брусчатка, кран, мороженое, метро, велосипед" loading="lazy" style="object-fit: contain; background: #fff">
+          <div class="case__body">
+            <p class="case__tag">кейс_02</p>
+            <h3 class="case__title">Иконографика для&nbsp;Музея Москвы</h3>
+            <p class="case__desc">В&nbsp;рамках стажировки разработала иконографику для&nbsp;digital- и&nbsp;print-среды: от&nbsp;анализа референсов и&nbsp;поиска стилистического направления до&nbsp;итоговой чёрно-белой глифовой системы. Работа проходила в&nbsp;несколько итераций по&nbsp;обратной связи старшего&nbsp;дизайнера.</p>
+            <a class="case__link" href="museum.html">подробнее о&nbsp;проекте
+              <svg viewBox="0 0 120 16" fill="none" aria-hidden="true"><path d="M0 8H118M111 1.5L118 8L111 14.5" stroke="#E45F21" stroke-width="2"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="case">
+          <img class="case__cover" src="images/case-polygames.jpg" alt="Главная страница Polygames: заголовок «Публикуйся, обсуждай проекты, продвигай свои игры», поиск по играм и карточки игр" loading="lazy" style="object-position: top">
+          <div class="case__body">
+            <p class="case__tag">кейс_03</p>
+            <h3 class="case__title">Polygames</h3>
+            <p class="case__desc">В&nbsp;составе команды работала над&nbsp;интерфейсом платформы для&nbsp;хранения и&nbsp;публикации студенческих игр Московского Политеха. Проектировала страницы, участвовала в&nbsp;развитии визуальной концепции и&nbsp;<span class="nobr">UI-kit</span>, работала с&nbsp;каталогом игр, карточками, навигацией и&nbsp;состояниями&nbsp;элементов.</p>
+            <span class="case__link case__link--soon" aria-disabled="true">кейс на&nbsp;оформлении
+              <span class="case__dash" aria-hidden="true"></span>
+            </span>
+          </div>
+        </article>
+
+        <article class="case">
+          <img class="case__cover" src="images/case-planetarium.jpg" alt="Hero-блок сайта планетария: Луна, кнопка «Купить билет» и заголовок «Планетарий»" loading="lazy" style="object-position: center">
+          <div class="case__body">
+            <p class="case__tag">кейс_04</p>
+            <h3 class="case__title">Планетарий</h3>
+            <p class="case__desc">В&nbsp;составе команды работала над&nbsp;редизайном сайта и&nbsp;его адаптацией под&nbsp;разные устройства. Моя зона ответственности&nbsp;— hero-блок, блок «График работы», интерактивные состояния и&nbsp;адаптивные версии этих&nbsp;секций.</p>
+            <span class="case__link case__link--soon" aria-disabled="true">кейс на&nbsp;оформлении
+              <span class="case__dash" aria-hidden="true"></span>
+            </span>
+          </div>
+        </article>
+
+        <article class="case">
+          <img class="case__cover" src="images/case-sakura.jpg" alt="Первый экран лендинга SAKURA FEST: надпись «Япония здесь», розовое солнце и фотография японского сада с сакурой" loading="lazy" style="object-position: top">
+          <div class="case__body">
+            <p class="case__tag">кейс_05</p>
+            <h3 class="case__title">SAKURA FEST</h3>
+            <p class="case__desc">Разработала редизайн лендинга фестиваля японской культуры: переработала структуру, собрала <span class="nobr">UI-kit</span> и&nbsp;адаптировала интерфейс под&nbsp;планшет и&nbsp;мобильные устройства. Дополнительно проработала анимацию отдельных&nbsp;элементов.</p>
+            <span class="case__link case__link--soon" aria-disabled="true">кейс на&nbsp;оформлении
+              <span class="case__dash" aria-hidden="true"></span>
+            </span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ОПЫТ -->
+  <section class="experience" id="experience">
+    <div class="container">
+      <div class="label"><span class="label__num">4</span><span class="label__text">ОПЫТ</span></div>
+      <h2 class="section-title" style="letter-spacing:0">ОПЫТ РАБОТЫ</h2>
+
+      <div class="timeline">
+        <div class="job">
+          <span class="square"></span>
+          <p class="job__date">сентябрь 2025&nbsp;— июнь 2026</p>
+          <div class="job__place" style="max-width:521px">
+            <p class="job__role">Веб-дизайнер&nbsp;— Музей Москвы</p>
+            <p class="job__about">Иконографика для&nbsp;обновляемого сайта, UX/UI-аудит и&nbsp;ведение проекта «Москва без&nbsp;окраин»&nbsp;на&nbsp;Tilda</p>
+          </div>
+        </div>
+        <div class="job">
+          <span class="square"></span>
+          <p class="job__date">апрель 2024&nbsp;— декабрь 2025</p>
+          <div class="job__place" style="max-width:613px">
+            <p class="job__role">UX/UI-дизайнер&nbsp;— Московский Политех</p>
+            <p class="job__about">Проектирование интерфейсов для&nbsp;платформы студенческих игр и&nbsp;сервиса психологической поддержки, работа&nbsp;с&nbsp;UI-китами.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- КОНТАКТЫ -->
+  <section class="contacts" id="contacts">
+    <div class="container">
+      <div class="label"><span class="label__num">5</span><span class="label__text">КОНТАКТЫ</span></div>
+      <h2 class="section-title contacts__title">Давайте обсудим ваш проект</h2>
+
+      <div class="contacts__table">
+        <div class="contact">
+          <p class="contact__label">ТЕЛЕФОН</p>
+          <a class="contact__value" href="tel:+79854457303">+7 985 445-73-03</a>
+        </div>
+        <div class="contact">
+          <p class="contact__label">ПОЧТА</p>
+          <a class="contact__value" href="mailto:sadidash@yandex.ru">sadidash@yandex.ru</a>
+        </div>
+        <div class="contact">
+          <p class="contact__label">ТЕЛЕГРАММ</p>
+          <a class="contact__value" href="https://t.me/dariostaa" target="_blank" rel="noopener">@dariostaa</a>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <p>© 2026 Дарья Садикова&nbsp;— UX/UI дизайнер</p>
+        <a class="to-top" href="#top">НАВЕРХ
+          <svg viewBox="0 0 14 11" fill="none" aria-hidden="true"><path d="M7 11V1.5M1.5 6.5L7 1L12.5 6.5" stroke="#333" stroke-width="2"/></svg>
+        </a>
+      </footer>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      var burger = document.querySelector('.burger');
+      var menu = document.getElementById('menu');
+      function setOpen(open) {
+        document.body.classList.toggle('menu-open', open);
+        burger.setAttribute('aria-expanded', open);
+        burger.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+      }
+      burger.addEventListener('click', function () {
+        setOpen(!document.body.classList.contains('menu-open'));
+      });
+      menu.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(false); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+      window.matchMedia('(min-width: 961px)').addEventListener('change', function (m) { if (m.matches) setOpen(false); });
+    })();
+  </script>
+</body>
+</html>
